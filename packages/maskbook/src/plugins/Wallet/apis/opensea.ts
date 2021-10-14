@@ -1,4 +1,5 @@
 import { ChainId } from '@masknet/web3-shared'
+import urlcat from 'urlcat'
 import { OPENSEA_API_KEY } from '../constants'
 
 interface AssetContract {
@@ -116,6 +117,21 @@ export interface AssetsListResponse {
     assets: Asset[]
 }
 
+async function Fetch(url: string, chainId: ChainId) {
+    if (![ChainId.Mainnet, ChainId.Rinkeby].includes(chainId)) return
+
+    const response = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'x-api-key': OPENSEA_API_KEY,
+        },
+    })
+
+    const json = await response.json()
+    return json
+}
+
 export async function getAssetsList(from: string, opts: { chainId?: ChainId; page?: number; size?: number }) {
     const { chainId = ChainId.Mainnet, page = 0, size = 50 } = opts
     const params = new URLSearchParams()
@@ -123,20 +139,35 @@ export async function getAssetsList(from: string, opts: { chainId?: ChainId; pag
     params.append('limit', String(size))
     params.append('offset', String(size * page))
 
-    if (![ChainId.Mainnet, ChainId.Rinkeby].includes(chainId))
+    const data = await Fetch(
+        `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/assets?${params.toString()}`,
+        chainId,
+    )
+    if (!data) {
         return {
             assets: [],
         } as AssetsListResponse
+    }
+    return data as AssetsListResponse
+}
 
-    const response = await fetch(
-        `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/assets?${params.toString()}`,
-        {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'x-api-key': OPENSEA_API_KEY,
-            },
-        },
+export async function getContract(address: string, chainId = ChainId.Mainnet) {
+    const data = await Fetch(
+        `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/asset_contract?${address}`,
+        chainId,
     )
-    return (await response.json()) as AssetsListResponse
+
+    return data as AssetContract
+}
+
+export async function getAsset(address: string, tokenId: string, chainId: ChainId) {
+    const response = await Fetch(
+        urlcat(
+            `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/asset?/:address/:tokenId`,
+            { address, tokenId },
+        ),
+        chainId,
+    )
+
+    return response as Asset
 }
