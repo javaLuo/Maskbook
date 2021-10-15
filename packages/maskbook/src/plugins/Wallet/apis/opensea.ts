@@ -1,4 +1,4 @@
-import { ChainId } from '@masknet/web3-shared'
+import { ChainId, createERC721ContractDetailed, createERC721Token, ERC721TokenDetailed } from '@masknet/web3-shared'
 import urlcat from 'urlcat'
 import { OPENSEA_API_KEY } from '../constants'
 
@@ -117,7 +117,11 @@ export interface AssetsListResponse {
     assets: Asset[]
 }
 
-async function Fetch(url: string, chainId: ChainId) {
+export interface ERC721TokenListResponse {
+    tokens: ERC721TokenDetailed[]
+}
+
+async function fetchAsset(url: string, chainId: ChainId) {
     if (![ChainId.Mainnet, ChainId.Rinkeby].includes(chainId)) return
 
     const response = await fetch(url, {
@@ -139,7 +143,7 @@ export async function getAssetsList(from: string, opts: { chainId?: ChainId; pag
     params.append('limit', String(size))
     params.append('offset', String(size * page))
 
-    const data = await Fetch(
+    const data = await fetchAsset(
         `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/assets?${params.toString()}`,
         chainId,
     )
@@ -151,17 +155,70 @@ export async function getAssetsList(from: string, opts: { chainId?: ChainId; pag
     return data as AssetsListResponse
 }
 
+export async function getAssetsPaged(from: string, opts: { chainId?: ChainId; page?: number; size?: number }) {
+    const { chainId = ChainId.Mainnet, page = 0, size = 50 } = opts
+    const params = new URLSearchParams()
+    params.append('owner', from.toLowerCase())
+    params.append('limit', String(size))
+    params.append('offset', String(size * page))
+
+    const asset = await fetchAsset(
+        `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/assets?${params.toString()}`,
+        chainId,
+    )
+    if (!asset) {
+        return {
+            tokens: [],
+        } as ERC721TokenListResponse
+    }
+
+    return {
+        tokens: asset.assets.map((asset: Asset) => createERC721TokenAsset(from, asset.token_id, chainId, asset)),
+    } as ERC721TokenListResponse
+}
+
+function createERC721ContractDetailedFromAssetContract(
+    address: string,
+    chainId: ChainId,
+    assetContract?: AssetContract,
+) {
+    return createERC721ContractDetailed(
+        chainId,
+        address,
+        assetContract?.name ?? 'unknown name',
+        assetContract?.symbol ?? 'unknown symbol',
+    )
+}
+
+function createERC721TokenAsset(address: string, tokenId: string, chainId: ChainId, asset?: Asset) {
+    return createERC721Token(
+        createERC721ContractDetailed(
+            chainId,
+            address,
+            asset?.asset_contract.name ?? 'unknown name',
+            asset?.asset_contract.symbol ?? 'unknown symbol',
+        ),
+        {
+            name: asset?.name ?? asset?.asset_contract.name ?? 'unknown name',
+            description: asset?.description ?? asset?.asset_contract.symbol ?? 'unknown symbol',
+            image: asset?.image_url || asset?.image_preview_url || asset?.asset_contract.image_url || '',
+            owner: asset?.owner.address ?? '',
+        },
+        tokenId,
+    )
+}
+
 export async function getContract(address: string, chainId = ChainId.Mainnet) {
-    const data = await Fetch(
+    const assetContract = await fetchAsset(
         `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/asset_contract?${address}`,
         chainId,
     )
 
-    return data as AssetContract
+    return createERC721ContractDetailedFromAssetContract(address, chainId, assetContract as AssetContract)
 }
 
 export async function getAsset(address: string, tokenId: string, chainId: ChainId) {
-    const response = await Fetch(
+    const asset = await fetchAsset(
         urlcat(
             `https://${chainId === ChainId.Mainnet ? 'api' : 'rinkeby-api'}.opensea.io/api/v1/asset?/:address/:tokenId`,
             { address, tokenId },
@@ -169,5 +226,19 @@ export async function getAsset(address: string, tokenId: string, chainId: ChainI
         chainId,
     )
 
-    return response as Asset
+    return createERC721TokenAsset(address, tokenId, chainId, asset as Asset)
+}
+
+export async function getAssets(from: string, chainId: ChainId) {
+    const tokens: ERC721TokenDetailed[] = []
+    let page = 0
+    let assets
+    const size = 50
+    do {
+        assets = await getAssetsPaged(from, { chainId, page, size })
+        tokens.concat(assets.tokens)
+        page = page + 1
+    } while (assets.tokens.length === size)
+
+    return tokens
 }

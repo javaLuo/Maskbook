@@ -32,7 +32,7 @@ import type {
     ZerionAsset,
     ZerionCovalentAsset,
 } from '../types'
-import { getAssetsPage } from './NFT/getAssetsPage'
+import { getAssetsPaged } from './NFT/getAssetsPaged'
 
 export async function getAssetsListNFT(
     address: string,
@@ -46,7 +46,7 @@ export async function getAssetsListNFT(
             assets: [],
             hasNextPage: false,
         }
-    const tokens = await getAssetsPage(address, chainId, page, size)
+    const tokens = await getAssetsPaged(address, chainId, page, size)
     return {
         assets: tokens,
         hasNextPage: tokens.length === size,

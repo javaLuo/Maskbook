@@ -1,4 +1,5 @@
-import { createERC721ContractDetailed } from '@masknet/web3-shared'
+import { unreachable } from '@dimensiondev/kit'
+import { CollectibleProvider } from '@masknet/web3-shared'
 import * as OpenSeaAPI from '../../apis/opensea'
 import { currentChainIdSettings, currentCollectibleDataProviderSettings } from '../../settings'
 
@@ -7,13 +8,7 @@ export async function getContract(contractAddress: string, chainId = currentChai
     switch (provider) {
         case CollectibleProvider.OPENSEA:
             const assetContract = await OpenSeaAPI.getContract(contractAddress, chainId)
-            if (!assetContract) return
-            return createERC721ContractDetailed(
-                chainId,
-                assetContract.address,
-                assetContract.name,
-                assetContract.symbol,
-            )
+            return assetContract
         default:
             unreachable(provider)
     }
