@@ -1,4 +1,5 @@
 import { test, expect, beforeAll } from '@jest/globals'
+// @ts-ignore
 import { webcrypto } from 'crypto'
 import { encryptBackup, decryptBackup } from '../src'
 

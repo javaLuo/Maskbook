@@ -50,7 +50,7 @@ importers:
       react-i18next: ^11.12.0
       ts-jest: ^27.0.5
       ts-node: ^10.2.1
-      typescript: 4.4.4
+      typescript: 4.5.0-beta
       web3-core: 1.5.2
       web3-core-method: 1.5.2
     dependencies:
@@ -79,7 +79,7 @@ importers:
       '@commitlint/config-conventional': 13.1.0
       '@dimensiondev/patch-package': 6.5.0
       '@jest/globals': 27.2.0
-      '@magic-works/i18n-codegen': 0.0.6_typescript@4.4.4
+      '@magic-works/i18n-codegen': 0.0.6_typescript@4.5.0-beta
       '@masknet/cli': link:packages/scripts
       '@nice-labs/git-rev': 3.5.0
       cspell: 5.9.1
@@ -98,9 +98,9 @@ importers:
       lint-staged: 11.1.2
       only-allow: 1.0.0
       prettier: 2.4.1
-      ts-jest: 27.0.5_jest@27.2.0+typescript@4.4.4
-      ts-node: 10.2.1_typescript@4.4.4
-      typescript: 4.4.4
+      ts-jest: 27.0.5_9823d3882c5a07df14df8fae6efd3491
+      ts-node: 10.2.1_typescript@4.5.0-beta
+      typescript: 4.5.0-beta
 
   packages/backup-format:
     specifiers:
@@ -4806,7 +4806,7 @@ packages:
       '@json-rpc-tools/types': 1.7.6
     dev: false
 
-  /@magic-works/i18n-codegen/0.0.6_typescript@4.4.4:
+  /@magic-works/i18n-codegen/0.0.6_typescript@4.5.0-beta:
     resolution: {integrity: sha512-vM8DzT7zcmCDk2KBoeyUgGzkW/4MaKIdDTTh67cJT0/VVXu7fQd2tjRglJwOunowTCwPxwIHWjoCD/DIN4iPXQ==}
     hasBin: true
     peerDependencies:
@@ -4815,7 +4815,7 @@ packages:
       chokidar: 3.5.2
       i18next-translation-parser: 1.0.1
       source-map: 0.7.3
-      typescript: 4.4.4
+      typescript: 4.5.0-beta
       yargs: 16.2.0
     dev: true
 
@@ -16778,7 +16778,7 @@ packages:
       jest-validate: 27.2.0
       micromatch: 4.0.4
       pretty-format: 27.2.0
-      ts-node: 10.2.1_typescript@4.4.4
+      ts-node: 10.2.1_typescript@4.5.0-beta
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -22890,7 +22890,7 @@ packages:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
     dev: true
 
-  /ts-jest/27.0.5_jest@27.2.0+typescript@4.4.4:
+  /ts-jest/27.0.5_9823d3882c5a07df14df8fae6efd3491:
     resolution: {integrity: sha512-lIJApzfTaSSbtlksfFNHkWOzLJuuSm4faFAfo5kvzOiRAuoN4/eKxVJ2zEAho8aecE04qX6K1pAzfH5QHL1/8w==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
@@ -22916,7 +22916,7 @@ packages:
       lodash: 4.17.21
       make-error: 1.3.6
       semver: 7.3.5
-      typescript: 4.4.4
+      typescript: 4.5.0-beta
       yargs-parser: 20.2.9
     dev: true
 
@@ -22947,6 +22947,36 @@ packages:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 4.4.4
+      yn: 3.1.1
+    dev: true
+
+  /ts-node/10.2.1_typescript@4.5.0-beta:
+    resolution: {integrity: sha512-hCnyOyuGmD5wHleOQX6NIjJtYVIO8bPP8F2acWkB4W06wdlkgyvJtubO/I9NkI88hCFECbsEgoLc0VNkYmcSfw==}
+    engines: {node: '>=12.0.0'}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.6.1
+      '@tsconfig/node10': 1.0.8
+      '@tsconfig/node12': 1.0.9
+      '@tsconfig/node14': 1.0.1
+      '@tsconfig/node16': 1.0.2
+      acorn: 8.4.1
+      acorn-walk: 8.1.1
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.5.0-beta
       yn: 3.1.1
     dev: true
 
@@ -23234,8 +23264,8 @@ packages:
     hasBin: true
     dev: false
 
-  /typescript/4.4.4:
-    resolution: {integrity: sha512-DqGhF5IKoBl8WNf8C1gu8q0xZSInh9j1kJJMqT3a94w1JzVaBU4EXOSMrz9yDqMT0xt3selp83fuFMQ0uzv6qA==}
+  /typescript/4.5.0-beta:
+    resolution: {integrity: sha512-7PvWhki2lwukaR9osVhFnNzxaE4LM+gC94dlwcvS+Tqz8+U65va7FbKo02bT+/MFlnMPM8bsPUXvHiMD/Mg3Jg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true

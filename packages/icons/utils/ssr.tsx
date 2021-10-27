@@ -1,4 +1,4 @@
-import { createRequire } from 'module'
+import Module from 'module'
 import { CacheProvider } from '@emotion/react'
 import { IconPreview } from './previewer'
 import { renderToString } from 'react-dom/server'
@@ -11,7 +11,7 @@ import * as Plugins from '../plugins'
 import * as Menus from '../menus'
 import * as Settings from '../settings'
 
-const require = createRequire(import.meta.url)
+const require = Module.createRequire(import.meta.url)
 const createCache: typeof import('@emotion/cache').default = require('@emotion/cache')
 const createEmotionServer: typeof import('@emotion/server/create-instance').default =
     require('@emotion/server/create-instance').default

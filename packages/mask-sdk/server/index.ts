@@ -2,7 +2,7 @@ import { BridgeAPI, UserScriptAPI, createMaskSDKChannel, serializer } from '../s
 import { AsyncCall } from 'async-call-rpc'
 
 export type { BridgeAPI, UserScriptAPI, InitInformation } from '../shared'
-export function createMaskSDKServer(api: BridgeAPI, signal?: AbortSignal) {
+export function createMaskSDKServer(api: BridgeAPI, signal?: AbortSignal): UserScriptAPI {
     // TODO: support AbortSignal
     return AsyncCall<UserScriptAPI>(api, {
         serializer,

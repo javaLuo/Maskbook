@@ -1,6 +1,6 @@
-import { JSONSerialization } from 'async-call-rpc/base.min'
-
-export const serializer = JSONSerialization(
+import { JSONSerialization, Serialization } from 'async-call-rpc/base.min'
+export type { Serialization } from 'async-call-rpc/base.min'
+export const serializer: Serialization = JSONSerialization(
     [
         (key, value) => {
             if (value instanceof ArrayBuffer) return ArrayBufferEncode(value)
