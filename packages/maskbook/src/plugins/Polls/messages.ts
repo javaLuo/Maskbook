@@ -3,9 +3,10 @@ import { createPluginMessage, createPluginRPC } from '@masknet/plugin-infra'
 import { OnDemandWorker } from '../../web-workers/OnDemandWorker'
 import { AsyncCall } from 'async-call-rpc'
 import { WorkerChannel } from 'async-call-rpc/utils/web/worker'
+import type { _AsyncVersionOf } from '../../../node_modules/async-call-rpc/out/full'
 
 const PollMessage = createPluginMessage(identifier)
-export const PluginPollRPC = createPluginRPC(
+export const PluginPollRPC: _AsyncVersionOf<typeof import('./Services')> = createPluginRPC(
     identifier,
     () => {
         const PollWorker = new OnDemandWorker(new URL('./Services.ts', import.meta.url), { name: 'Plugin/Poll' })

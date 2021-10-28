@@ -1,11 +1,5 @@
 import { Environment, isEnvironment, MessageTarget, UnboundedRegistry } from '@dimensiondev/holoflows-kit'
-import {
-    AsyncCall,
-    AsyncCallLogLevel,
-    AsyncGeneratorCall,
-    _AsyncVersionOf,
-    _AsyncGeneratorVersionOf,
-} from 'async-call-rpc/full'
+import { AsyncCall, AsyncCallLogLevel, AsyncGeneratorCall } from 'async-call-rpc/full'
 import { serializer, getLocalImplementation, getLocalImplementationExotic } from '@masknet/shared'
 const log: AsyncCallLogLevel = {
     beCalled: true,
@@ -15,13 +9,13 @@ const log: AsyncCallLogLevel = {
     sendLocalStack: true,
     type: 'pretty',
 }
-export function createPluginRPC<T extends object>(
+export function createPluginRPC<T extends Record<string, (...args: any[]) => Promise<any>>>(
     key: string,
     impl: () => T | Promise<T>,
     message: UnboundedRegistry<unknown>,
     /** Please set this to true if your implementation is a Proxy. */
     exoticImplementation?: boolean,
-): _AsyncVersionOf<T> {
+): T {
     const isBackground = isEnvironment(Environment.ManifestBackground)
     return AsyncCall<T>(
         (exoticImplementation ? getLocalImplementationExotic : getLocalImplementation)(`Plugin(${key})`, impl, message),
@@ -37,14 +31,14 @@ export function createPluginRPC<T extends object>(
             log,
             thenable: false,
         },
-    )
+    ) as any
 }
 
-export function createPluginRPCGenerator<T extends object>(
+export function createPluginRPCGenerator<T extends Record<string, (...args: any[]) => AsyncGenerator<any>>>(
     key: string,
     impl: () => Promise<T>,
     message: UnboundedRegistry<any>,
-): _AsyncGeneratorVersionOf<T> {
+): T {
     const isBackground = isEnvironment(Environment.ManifestBackground)
     return AsyncGeneratorCall<T>(getLocalImplementation(`Plugin(${key})`, impl, message), {
         channel: message.bind(MessageTarget.Broadcast),
@@ -56,5 +50,5 @@ export function createPluginRPCGenerator<T extends object>(
         },
         log,
         thenable: false,
-    })
+    }) as any
 }

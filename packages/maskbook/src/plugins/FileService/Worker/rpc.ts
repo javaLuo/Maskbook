@@ -13,6 +13,6 @@ export const PluginFileServiceRPC = createPluginRPC(
 
 export const PluginFileServiceRPCGenerator = createPluginRPCGenerator(
     FileServicePluginID,
-    () => import('./service').then(({ upload }) => ({ upload })),
+    () => import('./upload'),
     PluginFileServiceMessage._2,
 )

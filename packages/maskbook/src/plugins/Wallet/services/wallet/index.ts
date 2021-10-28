@@ -87,7 +87,7 @@ export async function getWallets(providerType?: ProviderType): Promise<
     return database.getWallets(providerType)
 }
 
-export function createMnemonicWords() {
+export async function createMnemonicWords() {
     return bip39.generateMnemonic().split(' ')
 }
 

@@ -1,19 +1,10 @@
 import { Attachment } from '@dimensiondev/common-protocols'
 import { encodeArrayBuffer, encodeText } from '@dimensiondev/kit'
-import Arweave from 'arweave/web'
-import type Transaction from 'arweave/web/lib/transaction'
 import { isEmpty, isNil } from 'lodash-es'
 import { landing, mesonPrefix } from '../constants'
 import { sign } from './remote-signing'
 import TOKEN from './arweave-token.json'
-
-const stage: Record<Transaction['id'], Transaction> = {}
-
-const instance = Arweave.init({
-    host: 'arweave.net',
-    port: 443,
-    protocol: 'https',
-})
+import { stage, instance } from './stage'
 
 export interface AttachmentOptions {
     key?: string | null
@@ -31,14 +22,6 @@ export async function makeAttachment(options: AttachmentOptions) {
     const transaction = await makePayload(encoded, 'application/octet-stream')
     stage[transaction.id] = transaction
     return transaction.id
-}
-
-// import { ServicesWithProgress } from 'src/extension/service.ts'
-// ServicesWithProgress.pluginArweaveUpload
-export async function* upload(id: Transaction['id']) {
-    for await (const uploader of instance.transactions.upload(stage[id])) {
-        yield uploader.pctComplete
-    }
 }
 
 export interface LandingPageMetadata {
