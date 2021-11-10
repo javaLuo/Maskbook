@@ -3,6 +3,7 @@ import { CssBaseline, StyledEngineProvider, Theme, ThemeProvider } from '@mui/ma
 import { Web3Provider } from '@masknet/web3-shared-evm'
 import { CustomSnackbarProvider } from '@masknet/theme'
 import { ErrorBoundary, ErrorBoundaryBuildInfoContext } from '@masknet/shared'
+import { SolanaProvider } from '@masknet/plugin-solana'
 import i18nNextInstance from './utils/i18n-next'
 import { Web3Context } from './web3/context'
 import { buildInfoMarkdown } from './extension/background-script/Jobs/PrintBuildFlags'
@@ -55,6 +56,7 @@ export function MaskUIRoot({ children, kind, useTheme }: MaskUIRootProps) {
         (jsx) => <ErrorBoundaryBuildInfoContext.Provider value={buildInfoMarkdown} children={jsx} />,
         (jsx) => <ErrorBoundary children={jsx} />,
         (jsx) => <Web3Provider value={Web3Context} children={jsx} />,
+        (jsx) => <SolanaProvider children={jsx} />,
         (jsx) => <I18nextProvider i18n={i18nNextInstance} children={jsx} />,
         kind === 'page' ? (jsx) => <StyledEngineProvider injectFirst children={jsx} /> : identity,
         (jsx) => (
