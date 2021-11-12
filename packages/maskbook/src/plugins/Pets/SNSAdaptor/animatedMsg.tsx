@@ -13,6 +13,7 @@ const useStyles = makeStyles()(() => ({
         fontWeight: 600,
         width: '150%',
         fontFamily: 'TwitterChirp',
+        pointerEvents: 'none',
     },
     enter: {
         left: 150,
@@ -85,8 +86,8 @@ const AnimatedMessage = () => {
             in={start}
             timeout={{
                 appear: 1000,
-                enter: 1500,
-                exit: 1500,
+                enter: 1200,
+                exit: 1200,
             }}
             classNames={{
                 enter: classes.enter,

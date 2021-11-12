@@ -15,6 +15,8 @@ const useStyles = makeStyles()((theme) => ({
         height: 26,
         backgroundRepeat: 'round',
         position: 'absolute',
+        bottom: 0,
+        left: -24,
     },
     content: {
         backgroundColor: 'red',

@@ -6,34 +6,22 @@ import Drag from './drag'
 import AnimatedMessage from './animatedMsg'
 import Tip from './tooltip'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
-import { scale } from '@balancer-labs/sor/dist/bmath'
 import classNames from 'classnames'
 
 const useStyles = makeStyles()(() => ({
-    
     root: {
         position: 'fixed',
         top: 0,
         left: 0,
     },
     img: {
+        position: 'relative',
         zIndex: 999,
         width: '100%',
         height: '100%',
         backgroundSize: 'contain',
-        // opacity: 0,
-        // transform: 'scale(.5,.5)',
-
-    },
-    '@keyframes showAnimation': {
-        '0%': {
-            opacity: 0,
-            transform: 'scale(.5,.5)',
-        },
-        '100%': {
-            opacity: 1,
-            transform: 'scale(1,1)',
-        },
+        opacity: 1,
+        transform: 'scale(.5,.5)',
     },
     close: {
         width: 25,
@@ -43,10 +31,27 @@ const useStyles = makeStyles()(() => ({
         position: 'absolute',
         top: 10,
         right: 0,
+        zIndex: 999,
+        transition: 'transform 300ms',
+        transform: 'rotate(0)',
+        '&:hover': {
+            transform: 'rotate(180deg)',
+        },
     },
-    show:{
-        animation: 'showAnimation 1s forwards',
-    }
+
+    show: {
+        animation: `show-animation 1s forwards`,
+        '@keyframes show-animation': {
+            '0%': {
+                opacity: 0,
+                transform: 'scale(.5,.5)',
+            },
+            '100%': {
+                opacity: 1,
+                transform: 'scale(1,1)',
+            },
+        },
+    },
 }))
 
 const AnimatePic = () => {
@@ -54,7 +59,7 @@ const AnimatePic = () => {
 
     const Close = getAssetAsBlobURL(new URL('../assets/close.png', import.meta.url))
 
-    const [show, setShow] = useState(true);
+    const [show, setShow] = useState(true)
 
     const identity = useCurrentVisitingIdentity()
     useEffect(() => {
@@ -66,16 +71,17 @@ const AnimatePic = () => {
     const handleClose = () => setShow(false)
 
     // 动画相关
-    
-    const DefaultAnimate = getAssetAsBlobURL(new URL('../assets/loot.gif', import.meta.url));
-    const FallAnimate = getAssetAsBlobURL(new URL('../assets/actions/fall.gif', import.meta.url));
-    const [gif, setGif] = useState(DefaultAnimate);
+
+    const DefaultAnimate = getAssetAsBlobURL(new URL('../assets/loot.gif', import.meta.url))
+    const FallAnimate = getAssetAsBlobURL(new URL('../assets/actions/fall.gif', import.meta.url))
+    const [gif, setGif] = useState(DefaultAnimate)
     const choseImg = (type: string) => {
-        switch(type){
+        switch (type) {
             case 'fall':
-                setGif(FallAnimate);break;
+                setGif(FallAnimate)
+                break
             default:
-                setGif(DefaultAnimate);
+                setGif(DefaultAnimate)
         }
     }
 
