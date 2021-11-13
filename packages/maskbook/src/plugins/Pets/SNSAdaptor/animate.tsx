@@ -3,7 +3,7 @@ import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
 import { getAssetAsBlobURL } from '../../../utils'
 import Drag from './drag'
-import AnimatedMessage from './animatedMsg'
+import Message from './animatedMsg'
 import Tip from './tooltip'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
 import classNames from 'classnames'
@@ -19,9 +19,11 @@ const useStyles = makeStyles()(() => ({
         zIndex: 999,
         width: '100%',
         height: '100%',
-        backgroundSize: 'contain',
         opacity: 1,
         transform: 'scale(.5,.5)',
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
     },
     close: {
         width: 25,
@@ -54,7 +56,9 @@ const useStyles = makeStyles()(() => ({
     },
 }))
 
-const AnimatePic = () => {
+let frame: number
+let timer: number
+const PetsDom = () => {
     const classes = useStylesExtends(useStyles(), {})
 
     const Close = getAssetAsBlobURL(new URL('../assets/close.png', import.meta.url))
@@ -71,26 +75,17 @@ const AnimatePic = () => {
     const handleClose = () => setShow(false)
 
     // 动画相关
-
-    const DefaultAnimate = getAssetAsBlobURL(new URL('../assets/loot.gif', import.meta.url))
-    const FallAnimate = getAssetAsBlobURL(new URL('../assets/actions/fall.gif', import.meta.url))
-    const [gif, setGif] = useState(DefaultAnimate)
-    const choseImg = (type: string) => {
-        switch (type) {
-            case 'fall':
-                setGif(FallAnimate)
-                break
-            default:
-                setGif(DefaultAnimate)
-        }
-    }
+    const [picShow, setPicShow] = useState<string>('')
 
     return (
         <div className={classes.root}>
             {show ? (
-                <Drag onChoseImg={(type) => choseImg(type)}>
-                    <AnimatedMessage />
-                    <div className={classNames(classes.img, classes.show)} style={{ backgroundImage: `url(${gif})` }} />
+                <Drag setPicShow={(picUrl) => {}}>
+                    <div
+                        className={classNames(classes.img, classes.show)}
+                        style={{ backgroundImage: `url(${Close})` }}
+                    />
+                    <Message />
                     <Tip />
                     <div className={classes.close} onClick={handleClose} style={{ backgroundImage: `url(${Close})` }} />
                 </Drag>
@@ -99,4 +94,4 @@ const AnimatePic = () => {
     )
 }
 
-export default AnimatePic
+export default PetsDom
