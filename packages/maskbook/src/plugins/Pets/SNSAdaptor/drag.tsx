@@ -1,5 +1,5 @@
 import React from 'react'
-import { clearAllAnimate, onPetFallAction } from './petActions'
+import { clearAllAnimate, onPetFallAction, onPetWalkAction, Direction, freeOnStandby } from './petActions'
 import { getAssetAsBlobURL } from '../../../utils'
 
 export type typeCoordinates = {
@@ -20,6 +20,7 @@ interface StateProps {
 
 interface Props {
     setPicShow: (url: string) => void
+    setPicDirection: (direction: Direction) => void
 }
 
 let timer: NodeJS.Timeout
@@ -201,11 +202,26 @@ class Draggable extends React.PureComponent<Props> {
         this.setState(
             {
                 picGroup: action?.pics ?? [],
+                petW: action?.w ?? 128,
+                petH: action?.h ?? 128,
             },
-            () => this.animateChangesPics(this.state.picGroup, 51, frameTurn, isLoop),
+            () => {
+                this.animateChangesPics(this.state.picGroup, 51, frameTurn, isLoop)
+                if (type === 'default') {
+                    console.log('type等于default了')
+                    freeOnStandby(
+                        3000,
+                        this.state.pos,
+                        this.state.petW,
+                        this.state.petH,
+                        this.freeOnStandbyCallback.bind(this),
+                    )
+                }
+            },
         )
     }
 
+    // 通用图片组动画循环播放函数
     animateChangesPics(group: string[], frame: number, frameTurn: number, isLoop: boolean) {
         animateTimer = requestAnimationFrame(() => this.animateChangesPics(group, frame + 1, frameTurn, isLoop))
         if (frame > frameTurn) {
@@ -227,28 +243,66 @@ class Draggable extends React.PureComponent<Props> {
 
     // 检查当前状态，判定应该执行什么动画
     checkStatus() {
-        // 执行新的动画前停止当前所有动画
         clearAllAnimate()
 
+        // 如果此时宠物正处于抓住的状态，则替换抓住的图片
         if (this.state.dragging) {
             this.getNowPicUrl('drag')
             return
         }
-        if (this.state.pos.y + this.state.petW < window.innerHeight) {
-            // 需要执行坠落动画
-            this.getNowPicUrl('fall')
-            onPetFallAction(this.state.pos.y, this.state.petH, 2, (newY: number, isLast?: boolean) => {
-                this.setState({
-                    pos: {
-                        x: this.state.pos.x,
-                        y: newY,
-                    },
-                })
 
-                if (isLast) {
-                    this.getNowPicUrl('standup', false, 10)
-                }
-            })
+        // 如果此时宠物没有处于屏幕底部，则需要执行坠落动画
+        if (this.state.pos.y + this.state.petW < window.innerHeight) {
+            this.freeOnStandbyCallback('fall')
+            return
+        }
+
+        // 如果没有状态命中，则替换默认图片
+        this.getNowPicUrl('default')
+    }
+
+    // 自动执行某动作时触发指定的动作
+    freeOnStandbyCallback(action: string) {
+        console.log('一个动作被触发：', action)
+        switch (action) {
+            case 'fall':
+                this.getNowPicUrl('fall')
+                onPetFallAction(this.state.pos.y, this.state.petH, 2, this.onPetFallActionCallback.bind(this))
+                break
+            case 'walk':
+                const direction = this.state.pos.x < window.innerWidth / 2 ? Direction.left : Direction.right
+                this.getNowPicUrl('walk', true, 20)
+                this.props.setPicDirection(direction)
+                onPetWalkAction(this.state.pos.x, this.state.petW, direction, this.onWalkActionCallback.bind(this))
+                break
+        }
+    }
+
+    // 坠落动画 回调函数
+    onPetFallActionCallback(newY: number, isLast?: boolean) {
+        this.setState({
+            pos: {
+                x: this.state.pos.x,
+                y: newY,
+            },
+        })
+
+        if (isLast) {
+            this.getNowPicUrl('standup', false, 10)
+        }
+    }
+
+    // 行走动画 回调函数
+    onWalkActionCallback(newX: number, isLast?: boolean) {
+        this.setState({
+            pos: {
+                x: newX,
+                y: this.state.pos.y,
+            },
+        })
+
+        if (isLast) {
+            this.getNowPicUrl('default')
         }
     }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { makeStyles } from '@masknet/theme'
 import { CSSTransition } from 'react-transition-group'
-import { useI18N } from '../../../utils'
+import { useI18N } from '../../../../utils'
 
 const useStyles = makeStyles()(() => ({
     txt: {

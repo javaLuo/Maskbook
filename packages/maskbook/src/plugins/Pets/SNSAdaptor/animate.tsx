@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
 import Drag from './drag'
-import Message from './animatedMsg'
+import Message from './components/animatedMsg'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
 import classNames from 'classnames'
 import Control from './components/control'
-
+import { Direction } from './petActions'
 const useStyles = makeStyles()(() => ({
     root: {
         position: 'fixed',
@@ -19,7 +19,6 @@ const useStyles = makeStyles()(() => ({
         width: '100%',
         height: '100%',
         opacity: 1,
-        transform: 'scale(.5,.5)',
         backgroundSize: 'contain',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -30,13 +29,15 @@ const useStyles = makeStyles()(() => ({
         '@keyframes show-animation': {
             '0%': {
                 opacity: 0,
-                transform: 'scale(.5,.5)',
             },
             '100%': {
                 opacity: 1,
-                transform: 'scale(1,1)',
             },
         },
+    },
+
+    turn: {
+        transform: 'scale(-1, 1)',
     },
 }))
 
@@ -54,6 +55,7 @@ const PetsDom = () => {
 
     // 动画相关
     const [picShow, setPicShow] = useState<string>('')
+    const [picDirection, setPicDirection] = useState<Direction>(Direction.left)
 
     // 控制器操作相关
     const [isControlShow, setControlShow] = useState(false)
@@ -65,9 +67,15 @@ const PetsDom = () => {
     return (
         <div className={classes.root}>
             {show ? (
-                <Drag setPicShow={(picUrl) => setPicShow(picUrl)}>
+                <Drag
+                    setPicShow={(picUrl) => setPicShow(picUrl)}
+                    setPicDirection={(direction) => setPicDirection(direction)}>
                     <div
-                        className={classNames(classes.img, classes.show)}
+                        className={classNames(
+                            classes.img,
+                            classes.show,
+                            picDirection === Direction.right ? classes.turn : '',
+                        )}
                         style={{ backgroundImage: `url(${picShow})` }}
                     />
                     <Message />

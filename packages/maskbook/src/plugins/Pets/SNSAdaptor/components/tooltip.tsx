@@ -1,7 +1,7 @@
 import React from 'react'
 import { makeStyles } from '@masknet/theme'
 import { Tooltip, Typography, Box } from '@mui/material'
-import { getAssetAsBlobURL, useI18N } from '../../../utils'
+import { getAssetAsBlobURL, useI18N } from '../../../../utils'
 
 const useStyles = makeStyles()((theme) => ({
     root: {
