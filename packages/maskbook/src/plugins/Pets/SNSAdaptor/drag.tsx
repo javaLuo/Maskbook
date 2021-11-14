@@ -1,6 +1,6 @@
 import React from 'react'
 import { clearAllAnimate, onPetFallAction } from './petActions'
-// import { getAssetAsBlobURL } from '../../../utils'
+import { getAssetAsBlobURL } from '../../../utils'
 
 export type typeCoordinates = {
     x: number
@@ -24,7 +24,7 @@ interface Props {
 
 let timer: NodeJS.Timeout
 let animateTimer: number
-const picIndex: number = 0
+let picIndex: number = 0
 
 class Draggable extends React.PureComponent<Props> {
     ref = React.createRef<HTMLDivElement | null>()
@@ -53,48 +53,60 @@ class Draggable extends React.PureComponent<Props> {
         },
         picGroup: [],
         picInfo: [
-            // {
-            //     "name":"default",
-            //     "pics": ['123123.png'],
-            //     "w": 128,
-            //     "h": 128
-            // },
-            // {
-            //     "name":"walk",
-            //     "pics": [getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)), getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url))],
-            //     "w": 128,
-            //     "h": 128
-            // },
-            // {
-            //     "name":"fall",
-            //     "pics": [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
-            //     "w": 128,
-            //     "h": 128
-            // },
-            // {
-            //     "name":"fallend",
-            //     "pics": [getAssetAsBlobURL(new URL('../assets/pet_fox/frame8.png', import.meta.url)), getAssetAsBlobURL(new URL('../assets/pet_fox/frame9.png', import.meta.url))],
-            //     "w": 128,
-            //     "h": 128
-            // },
-            // {
-            //     "name":"drag",
-            //     "pics": [getAssetAsBlobURL(new URL('../assets/pet_fox/frame5.png', import.meta.url)), getAssetAsBlobURL(new URL('../assets/pet_fox/frame6.png', import.meta.url)), getAssetAsBlobURL(new URL('../assets/pet_fox/frame7.png', import.meta.url)), getAssetAsBlobURL(new URL('../assets/pet_fox/frame8.png', import.meta.url))],
-            //     "w": 128,
-            //     "h": 128
-            // }
+            {
+                name: 'default',
+                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame1.png', import.meta.url))],
+                w: 128,
+                h: 128,
+            },
+            {
+                name: 'walk',
+                pics: [
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
+                ],
+                w: 128,
+                h: 128,
+            },
+            {
+                name: 'fall',
+                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
+                w: 128,
+                h: 128,
+            },
+            {
+                name: 'standup',
+                pics: [
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
+                ],
+                w: 128,
+                h: 128,
+            },
+            {
+                name: 'drag',
+                pics: [
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame5.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame6.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame7.png', import.meta.url)),
+                ],
+                w: 128,
+                h: 128,
+            },
         ],
     }
 
     override componentDidMount() {
         window.addEventListener('resize', this.windowResize)
-        this.setState({
-            pos: {
-                x: window.innerWidth - this.state.petW - 50,
-                y: window.innerHeight - this.state.petH - 150,
+        this.setState(
+            {
+                pos: {
+                    x: window.innerWidth - this.state.petW - 50,
+                    y: window.innerHeight / 2,
+                },
             },
-        })
-        // this.getNowPicUrl('default');
+            () => this.checkStatus(),
+        )
     }
 
     override componentDidUpdate(_props: any, state: StateProps) {
@@ -131,14 +143,16 @@ class Draggable extends React.PureComponent<Props> {
         if (e.button !== 0) return
         if (!this.ref?.current) return
 
-        this.setState({
-            dragging: true,
-            start: {
-                x: e.pageX,
-                y: e.pageY,
+        this.setState(
+            {
+                dragging: true,
+                start: {
+                    x: e.pageX,
+                    y: e.pageY,
+                },
             },
-        })
-        // this.getNowPicUrl('default');
+            () => this.checkStatus(),
+        )
         e.stopPropagation()
         e.preventDefault()
     }
@@ -147,7 +161,7 @@ class Draggable extends React.PureComponent<Props> {
         if (!this.state.dragging) return
         // 计算当前还能够向左移动多少距离
         const minX = -this.state.pos.x
-        const maxX = window.innerWidth - this.state.pos.x - this.state.petW
+        const maxX = window.innerWidth - this.state.pos.x - this.state.petW - 20 // 20为滚动条宽度
         const minY = -this.state.pos.y
         const maxY = window.innerHeight - this.state.pos.y - this.state.petH
         this.setState({
@@ -181,27 +195,34 @@ class Draggable extends React.PureComponent<Props> {
     }
 
     // 获取当前该显示哪个图片组
-    getNowPicUrl(type: string) {
+    getNowPicUrl(type: string, isLoop = true, frameTurn = 50) {
         cancelAnimationFrame(animateTimer)
         const action = this.state.picInfo.find((item) => item.name === type)
         this.setState(
             {
                 picGroup: action?.pics ?? [],
             },
-            () => this.animateChangesPics(this.state.picGroup, 0),
+            () => this.animateChangesPics(this.state.picGroup, 51, frameTurn, isLoop),
         )
     }
 
-    animateChangesPics(group: string[], frame: number) {
-        // animateTimer = requestAnimationFrame(() => this.animateChangesPics(group, frame + 1));
-        // if(frame > 100){
-        //     frame = 0;
-        //     let picIndexNext = picIndex + 1;
-        //     if(picIndexNext > this.state.picGroup.length - 1){
-        //         picIndexNext = 0;
-        //     }
-        //    this.props.setPicShow(this.state.picGroup[picIndexNext]);
-        // }
+    animateChangesPics(group: string[], frame: number, frameTurn: number, isLoop: boolean) {
+        animateTimer = requestAnimationFrame(() => this.animateChangesPics(group, frame + 1, frameTurn, isLoop))
+        if (frame > frameTurn) {
+            frame = 0
+
+            if (picIndex > this.state.picGroup.length - 1) {
+                if (isLoop) {
+                    picIndex = 0
+                } else {
+                    cancelAnimationFrame(animateTimer)
+                    this.getNowPicUrl('default')
+                }
+            }
+
+            this.props.setPicShow(this.state.picGroup[picIndex])
+            picIndex = picIndex + 1
+        }
     }
 
     // 检查当前状态，判定应该执行什么动画
@@ -209,6 +230,10 @@ class Draggable extends React.PureComponent<Props> {
         // 执行新的动画前停止当前所有动画
         clearAllAnimate()
 
+        if (this.state.dragging) {
+            this.getNowPicUrl('drag')
+            return
+        }
         if (this.state.pos.y + this.state.petW < window.innerHeight) {
             // 需要执行坠落动画
             this.getNowPicUrl('fall')
@@ -221,7 +246,7 @@ class Draggable extends React.PureComponent<Props> {
                 })
 
                 if (isLast) {
-                    this.getNowPicUrl('default')
+                    this.getNowPicUrl('standup', false, 10)
                 }
             })
         }

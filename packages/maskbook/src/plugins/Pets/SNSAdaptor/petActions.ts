@@ -5,10 +5,7 @@ export const clearAllAnimate = () => {
     cancelAnimationFrame(animateId)
 }
 
-// 开始补间动画
-export const startTweenAnimation = () => {}
-
-// 动物坠落
+// 宠物坠落
 export const onPetFallAction = (
     y: number,
     h: number,
@@ -30,6 +27,5 @@ export const onPetFallAction = (
 
 export default {
     clearAllAnimate,
-    startTweenAnimation,
     onPetFallAction,
 }
