@@ -23,7 +23,13 @@ const useStyles = makeStyles()(() => ({
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
     },
-
+    imgR: {
+        backgroundPosition: 'center right',
+    },
+    imgL: {
+        backgroundPosition: 'center left',
+        backgroundColor: '#f00',
+    },
     show: {
         animation: `show-animation 1s forwards`,
         '@keyframes show-animation': {
@@ -56,6 +62,7 @@ const PetsDom = () => {
     // 动画相关
     const [picShow, setPicShow] = useState<string>('')
     const [picDirection, setPicDirection] = useState<Direction>(Direction.left)
+    const [picPosition, setPicPosition] = useState(0)
 
     // 控制器操作相关
     const [isControlShow, setControlShow] = useState(false)
@@ -64,17 +71,32 @@ const PetsDom = () => {
     const onClosePet = () => {
         setShow(false)
     }
+
+    // 新的一帧
+    const setNewFrame = (pic: string, isTurn: boolean) => {
+        setPicShow(pic)
+        isTurn && setPicDirection(picDirection === Direction.left ? Direction.right : Direction.left)
+    }
+
+    // 设置各个方位
+    const setDirection = (direction: Direction, position: number = 0) => {
+        setPicDirection(direction)
+        setPicPosition(position)
+    }
+
     return (
         <div className={classes.root}>
             {show ? (
                 <Drag
-                    setPicShow={(picUrl) => setPicShow(picUrl)}
-                    setPicDirection={(direction) => setPicDirection(direction)}>
+                    direction={picDirection}
+                    setNewFrame={(pic, isTurn) => setNewFrame(pic, isTurn)}
+                    setDirection={(direction, position) => setDirection(direction, position)}>
                     <div
                         className={classNames(
                             classes.img,
                             classes.show,
-                            picDirection === Direction.right ? classes.turn : '',
+                            picDirection === Direction.right && classes.turn,
+                            picPosition === 2 && classes.imgR,
                         )}
                         style={{ backgroundImage: `url(${picShow})` }}
                     />

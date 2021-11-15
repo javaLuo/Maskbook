@@ -1,5 +1,12 @@
 import React from 'react'
-import { clearAllAnimate, onPetFallAction, onPetWalkAction, Direction, freeOnStandby } from './petActions'
+import {
+    clearAllAnimate,
+    onPetFallAction,
+    onPetWalkAction,
+    Direction,
+    freeOnStandby,
+    onPetClimbAction,
+} from './petActions'
 import { getAssetAsBlobURL } from '../../../utils'
 
 export type typeCoordinates = {
@@ -12,15 +19,17 @@ interface StateProps {
     pos: typeCoordinates
     start: typeCoordinates // 鼠标按下时记录值
     move: typeCoordinates
+    prev: typeCoordinates
     picGroup: string[]
     petW: number
     petH: number
-    picInfo: { name: string; pics: string[]; w: number; h: number }[]
+    picInfo: { name: string; pics: string[] }[]
 }
 
 interface Props {
-    setPicShow: (url: string) => void
-    setPicDirection: (direction: Direction) => void
+    direction: Direction
+    setNewFrame: (url: string, isTurn: boolean) => void
+    setDirection: (direction: Direction, position?: number) => void
 }
 
 let timer: NodeJS.Timeout
@@ -52,13 +61,16 @@ class Draggable extends React.PureComponent<Props> {
             x: 0,
             y: 0,
         },
+        prev: {
+            // 上一次的鼠标位置
+            x: 0,
+            y: 0,
+        },
         picGroup: [],
         picInfo: [
             {
                 name: 'default',
-                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame1.png', import.meta.url))],
-                w: 128,
-                h: 128,
+                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url))],
             },
             {
                 name: 'walk',
@@ -66,14 +78,19 @@ class Draggable extends React.PureComponent<Props> {
                     getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
                     getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
                 ],
-                w: 128,
-                h: 128,
+            },
+            {
+                name: 'sit',
+                pics: [
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame16.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame17.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame37.png', import.meta.url)),
+                ],
             },
             {
                 name: 'fall',
                 pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
-                w: 128,
-                h: 128,
             },
             {
                 name: 'standup',
@@ -81,18 +98,17 @@ class Draggable extends React.PureComponent<Props> {
                     getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
                     getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
                 ],
-                w: 128,
-                h: 128,
             },
             {
                 name: 'drag',
+                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame9.png', import.meta.url))],
+            },
+            {
+                name: 'climb',
                 pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame5.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame6.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame7.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb01.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
                 ],
-                w: 128,
-                h: 128,
             },
         ],
     }
@@ -165,10 +181,20 @@ class Draggable extends React.PureComponent<Props> {
         const maxX = window.innerWidth - this.state.pos.x - this.state.petW - 20 // 20为滚动条宽度
         const minY = -this.state.pos.y
         const maxY = window.innerHeight - this.state.pos.y - this.state.petH
+        // 向右移动
+        if (e.pageX > this.state.prev.x && this.props.direction === Direction.right) {
+            this.props.setDirection(Direction.left)
+        } else if (e.pageX < this.state.prev.x && this.props.direction === Direction.left) {
+            this.props.setDirection(Direction.right)
+        }
         this.setState({
             move: {
                 x: Math.max(Math.min(e.pageX - this.state.start.x, maxX), minX),
                 y: Math.max(Math.min(e.pageY - this.state.start.y, maxY), minY),
+            },
+            prev: {
+                x: e.pageX,
+                y: 0,
             },
         })
         e.stopPropagation()
@@ -202,11 +228,19 @@ class Draggable extends React.PureComponent<Props> {
         this.setState(
             {
                 picGroup: action?.pics ?? [],
-                petW: action?.w ?? 128,
-                petH: action?.h ?? 128,
             },
             () => {
-                this.animateChangesPics(this.state.picGroup, 51, frameTurn, isLoop)
+                if (['sit'].includes(type)) {
+                    this.animateChangesPicsRandom(
+                        this.state.picGroup,
+                        100,
+                        frameTurn,
+                        Date.now() + Math.random() * 5000 + 5000,
+                    )
+                } else {
+                    this.animateChangesPics(this.state.picGroup, 50, frameTurn, isLoop)
+                }
+
                 if (type === 'default') {
                     console.log('type等于default了')
                     freeOnStandby(
@@ -236,8 +270,22 @@ class Draggable extends React.PureComponent<Props> {
                 }
             }
 
-            this.props.setPicShow(this.state.picGroup[picIndex])
+            this.props.setNewFrame(this.state.picGroup[picIndex], false)
             picIndex = picIndex + 1
+        }
+    }
+
+    // 随机图片组动画循环播放函数
+    animateChangesPicsRandom(group: string[], frame: number, frameTurn: number, endTime: number) {
+        animateTimer = requestAnimationFrame(() => this.animateChangesPicsRandom(group, frame + 1, frameTurn, endTime))
+        if (frame > frameTurn) {
+            if (Date.now() > endTime) {
+                this.getNowPicUrl('default')
+            } else {
+                frame = 0
+                picIndex = Math.round(Math.random() * (this.state.picGroup.length - 1))
+                this.props.setNewFrame(this.state.picGroup[picIndex], Math.random() > 0.6)
+            }
         }
     }
 
@@ -270,11 +318,25 @@ class Draggable extends React.PureComponent<Props> {
                 onPetFallAction(this.state.pos.y, this.state.petH, 2, this.onPetFallActionCallback.bind(this))
                 break
             case 'walk':
-                const direction = this.state.pos.x < window.innerWidth / 2 ? Direction.left : Direction.right
+                let direction
+                if (this.state.pos.x > this.state.petW && this.state.pos.x < window.innerWidth - this.state.petW - 20) {
+                    direction = Math.random() > 0.5 ? Direction.right : Direction.left
+                } else {
+                    direction = this.state.pos.x < window.innerWidth / 2 ? Direction.right : Direction.left
+                }
                 this.getNowPicUrl('walk', true, 20)
-                this.props.setPicDirection(direction)
+                this.props.setDirection(direction)
                 onPetWalkAction(this.state.pos.x, this.state.petW, direction, this.onWalkActionCallback.bind(this))
                 break
+            case 'sit':
+                this.getNowPicUrl('sit', true, 100)
+                break
+            case 'climb':
+                this.getNowPicUrl('climb', true, 30)
+                const isL = this.state.pos.x < window.innerWidth / 2
+                const direction2 = isL ? Direction.right : Direction.left
+                this.props.setDirection(direction2, 2)
+                onPetClimbAction(this.state.pos.y, this.onPetClimbActionCallback.bind(this))
         }
     }
 
@@ -303,6 +365,22 @@ class Draggable extends React.PureComponent<Props> {
 
         if (isLast) {
             this.getNowPicUrl('default')
+        }
+    }
+
+    // 爬墙 回调函数
+    onPetClimbActionCallback(newY: number, isLast?: boolean) {
+        this.setState({
+            pos: {
+                x: this.state.pos.x < window.innerWidth / 2 ? 0 : window.innerWidth - this.state.petW - 20,
+                y: newY,
+            },
+        })
+
+        if (isLast) {
+            // 开始倒立
+            // this.getNowPicUrl('fall')
+            this.checkStatus()
         }
     }
 

@@ -7,7 +7,7 @@ export enum Direction {
 }
 
 const petConfig = {
-    freeActions: ['walk'],
+    freeActions: ['walk', 'climb', 'sit'],
 }
 
 // 停止所有动画，回到初始动画
@@ -27,14 +27,19 @@ export const freeOnStandby = (
     clearTimeout(freeTimer)
     freeTimer = setTimeout(() => {
         const freeActions = [...petConfig.freeActions]
-        if (pos.x <= 0 || pos.x >= window.innerWidth - petW - 20) {
-            const index = freeActions.findIndex((item) => item === 'walk')
-            if (index >= 0) {
-                freeActions.splice(index, 1)
-            }
+        if (pos.x <= 1 || pos.x >= window.innerWidth - petW - 21) {
+            // 在边缘，就不能行走
+            // const index = freeActions.findIndex((item) => item === 'walk')
+            // index >= 0 && freeActions.splice(index, 1);
+        } else {
+            // 不在边缘，不能爬墙
+            const index = freeActions.findIndex((item) => item === 'climb')
+            index >= 0 && freeActions.splice(index, 1)
         }
-        const choseAction = freeActions[Math.round(Math.random() * (freeActions.length - 1))]
-        console.log('选中了什么动作：', choseAction)
+        const r = Math.random()
+
+        const choseAction = freeActions[Math.floor(r * freeActions.length + 1) - 1]
+        console.log('选中了什么动作：', choseAction, freeActions, r)
         callback(choseAction)
     }, delay)
 }
@@ -73,7 +78,7 @@ export const onPetWalkAction = (
 ) => {
     animateId = requestAnimationFrame(() => onPetWalkAction(x + step, w, direction, callback))
     const step = direction === Direction.left ? -1 : 1
-    if (x <= 0 || x >= window.innerWidth - w - 20) {
+    if ((step === -1 && x <= 0) || (step === 1 && x >= window.innerWidth - w - 20)) {
         cancelAnimationFrame(animateId)
         callback(direction === Direction.left ? 0 : window.innerWidth - w - 20, true)
         return
@@ -81,9 +86,22 @@ export const onPetWalkAction = (
     callback(x)
 }
 
+/**
+ * 宠物爬墙 纵向
+ */
+export const onPetClimbAction = (y: number, callback: (y: number, isLast?: boolean) => void) => {
+    animateId = requestAnimationFrame(() => onPetClimbAction(y - 1, callback))
+    if (y <= 0) {
+        cancelAnimationFrame(animateId)
+        callback(0, true)
+    }
+    callback(y)
+}
+
 export default {
+    Direction,
     clearAllAnimate,
     onPetFallAction,
-    Direction,
     onPetWalkAction,
+    onPetClimbAction,
 }
