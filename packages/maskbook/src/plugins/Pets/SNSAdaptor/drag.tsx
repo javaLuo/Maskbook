@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-    clearAllAnimate,
-    onPetFallAction,
-    onPetWalkAction,
-    Direction,
-    freeOnStandby,
-    onPetClimbAction,
-} from './petActions'
+import { startAnimate, choseAction, freeOnStandby, onActionsEnd, Direction, stopAnimate } from './petActionAnimate'
 import { getAssetAsBlobURL } from '../../../utils'
 
 export type typeCoordinates = {
@@ -110,11 +103,20 @@ class Draggable extends React.PureComponent<Props> {
                     getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
                 ],
             },
+            {
+                name: 'sleep',
+                pics: [
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
+                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame21.png', import.meta.url)),
+                ],
+            },
         ],
     }
 
     override componentDidMount() {
         window.addEventListener('resize', this.windowResize)
+        startAnimate()
         this.setState(
             {
                 pos: {
@@ -136,6 +138,7 @@ class Draggable extends React.PureComponent<Props> {
         }
     }
     override componentWillUnmount() {
+        stopAnimate()
         document.removeEventListener('mousemove', this.mouseMoveFuc)
         document.removeEventListener('mouseup', this.mouseUpFuc)
         window.removeEventListener('resize', this.windowResize)
@@ -157,6 +160,9 @@ class Draggable extends React.PureComponent<Props> {
     }
 
     onMouseDown(e: React.MouseEvent) {
+        e.stopPropagation()
+        e.preventDefault()
+
         if (e.button !== 0) return
         if (!this.ref?.current) return
 
@@ -170,8 +176,6 @@ class Draggable extends React.PureComponent<Props> {
             },
             () => this.checkStatus(),
         )
-        e.stopPropagation()
-        e.preventDefault()
     }
 
     onMouseMove(e: MouseEvent) {
@@ -248,7 +252,7 @@ class Draggable extends React.PureComponent<Props> {
                         this.state.pos,
                         this.state.petW,
                         this.state.petH,
-                        this.freeOnStandbyCallback.bind(this),
+                        this.beginOneActionPrepare.bind(this),
                     )
                 }
             },
@@ -256,7 +260,7 @@ class Draggable extends React.PureComponent<Props> {
     }
 
     // 通用图片组动画循环播放函数
-    animateChangesPics(group: string[], frame: number, frameTurn: number, isLoop: boolean) {
+    animateChangesPics(group: string[], frame: number, frameTurn: number, isLoop: boolean, sequence?: {}) {
         animateTimer = requestAnimationFrame(() => this.animateChangesPics(group, frame + 1, frameTurn, isLoop))
         if (frame > frameTurn) {
             frame = 0
@@ -271,6 +275,9 @@ class Draggable extends React.PureComponent<Props> {
             }
 
             this.props.setNewFrame(this.state.picGroup[picIndex], false)
+
+            if (sequence) {
+            }
             picIndex = picIndex + 1
         }
     }
@@ -291,31 +298,39 @@ class Draggable extends React.PureComponent<Props> {
 
     // 检查当前状态，判定应该执行什么动画
     checkStatus() {
-        clearAllAnimate()
+        console.log('checkStatus开始判定')
+        onActionsEnd()
 
         // 如果此时宠物正处于抓住的状态，则替换抓住的图片
         if (this.state.dragging) {
             this.getNowPicUrl('drag')
+            console.log('checkStatus: 判定为拖拽中')
             return
         }
 
         // 如果此时宠物没有处于屏幕底部，则需要执行坠落动画
         if (this.state.pos.y + this.state.petW < window.innerHeight) {
-            this.freeOnStandbyCallback('fall')
+            this.beginOneActionPrepare('fall')
             return
         }
 
         // 如果没有状态命中，则替换默认图片
+        console.log('checkStatus没有状态命中，变为default')
         this.getNowPicUrl('default')
     }
 
     // 自动执行某动作时触发指定的动作
-    freeOnStandbyCallback(action: string) {
+    beginOneActionPrepare(action: string) {
         console.log('一个动作被触发：', action)
         switch (action) {
             case 'fall':
                 this.getNowPicUrl('fall')
-                onPetFallAction(this.state.pos.y, this.state.petH, 2, this.onPetFallActionCallback.bind(this))
+                choseAction('fall', {
+                    y: this.state.pos.y,
+                    petH: this.state.petH,
+                    distance: 5,
+                    callback: this.onPetFallActionCallback.bind(this),
+                })
                 break
             case 'walk':
                 let direction
@@ -326,7 +341,12 @@ class Draggable extends React.PureComponent<Props> {
                 }
                 this.getNowPicUrl('walk', true, 20)
                 this.props.setDirection(direction)
-                onPetWalkAction(this.state.pos.x, this.state.petW, direction, this.onWalkActionCallback.bind(this))
+                choseAction('walk', {
+                    x: this.state.pos.x,
+                    petW: this.state.petW,
+                    direction,
+                    callback: this.onWalkActionCallback.bind(this),
+                })
                 break
             case 'sit':
                 this.getNowPicUrl('sit', true, 100)
@@ -336,48 +356,56 @@ class Draggable extends React.PureComponent<Props> {
                 const isL = this.state.pos.x < window.innerWidth / 2
                 const direction2 = isL ? Direction.right : Direction.left
                 this.props.setDirection(direction2, 2)
-                onPetClimbAction(this.state.pos.y, this.onPetClimbActionCallback.bind(this))
+                choseAction('climb', {
+                    y: this.state.pos.y,
+                    callback: this.onPetClimbActionCallback.bind(this),
+                })
+                break
+            case 'sleep':
+                this.getNowPicUrl('sleep', true, 20)
+                break
         }
     }
 
     // 坠落动画 回调函数
-    onPetFallActionCallback(newY: number, isLast?: boolean) {
+    onPetFallActionCallback(options: { y: number; isLast?: boolean }) {
         this.setState({
             pos: {
                 x: this.state.pos.x,
-                y: newY,
+                y: options.y,
             },
         })
 
-        if (isLast) {
+        if (options.isLast) {
             this.getNowPicUrl('standup', false, 10)
         }
     }
 
     // 行走动画 回调函数
-    onWalkActionCallback(newX: number, isLast?: boolean) {
+    onWalkActionCallback(options: { x: number; isLast?: boolean }) {
         this.setState({
             pos: {
-                x: newX,
+                x: options.x,
                 y: this.state.pos.y,
             },
         })
 
-        if (isLast) {
-            this.getNowPicUrl('default')
+        if (options.isLast) {
+            this.beginOneActionPrepare('climb')
         }
     }
 
     // 爬墙 回调函数
-    onPetClimbActionCallback(newY: number, isLast?: boolean) {
+    onPetClimbActionCallback(options: { y: number; isLast?: boolean }) {
         this.setState({
             pos: {
                 x: this.state.pos.x < window.innerWidth / 2 ? 0 : window.innerWidth - this.state.petW - 20,
-                y: newY,
+                y: options.y,
             },
         })
 
-        if (isLast) {
+        if (options.isLast) {
+            console.log('爬墙结束')
             // 开始倒立
             // this.getNowPicUrl('fall')
             this.checkStatus()
