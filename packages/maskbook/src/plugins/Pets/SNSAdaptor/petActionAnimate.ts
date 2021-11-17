@@ -11,7 +11,6 @@ let type: string
 // 动作循环器
 export const startAnimate = () => {
     animateId = requestAnimationFrame(startAnimate)
-    console.log(animateId)
     switch (type) {
         case 'fall':
             onPetFallAction()
@@ -51,7 +50,7 @@ export const onActionsEnd = () => {
 // 每过一段时间随机选择一个动作
 let freeTimer: NodeJS.Timeout
 const petConfig = {
-    freeActions: ['walk', 'climb', 'sit'],
+    freeActions: ['walk', 'climb', 'sit', 'sleep'],
 }
 
 export const freeOnStandby = (
@@ -94,7 +93,6 @@ export enum Direction {
  * @param {number} distance 本次位移距离，模拟重力
  * */
 export const onPetFallAction = () => {
-    console.log('执行：', options)
     // 本次该移动多少距离，每次都移动得越来越大，但不能超过当前距离底部的距离
     const howFar = window.innerHeight - (options.y + options.petH)
     const step = Math.min(howFar, options.distance)
@@ -113,6 +111,7 @@ export const onPetFallAction = () => {
  * 宠物行走
  * @param {number} x 宠物当前距离屏幕左侧的距离
  * @param {number} petW 宠物当前的宽度
+ * @param {number} endTime 走路超过此时长直接结束
  * @param {string} direction 往左还是右 left/right
  */
 const onPetWalkAction = () => {
@@ -125,6 +124,16 @@ const onPetWalkAction = () => {
         onActionsEnd()
         return
     }
+
+    if (Date.now() > options.endTime) {
+        options.callback({
+            x: options.x,
+            isLast: true,
+        })
+        onActionsEnd()
+        return
+    }
+
     options.callback({ x: options.x })
 
     options.x += step
