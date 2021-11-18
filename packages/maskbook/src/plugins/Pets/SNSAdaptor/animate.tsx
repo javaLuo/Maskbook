@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
-import Drag from './drag'
-import Message from './components/animatedMsg'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
 import classNames from 'classnames'
-import Control from './components/control'
+
 import { Direction } from './petActions'
+import Drag from './drag'
+import Message from './components/animatedMsg'
+import Control from './components/control'
+
 const useStyles = makeStyles()(() => ({
     root: {
         position: 'fixed',
@@ -46,6 +48,9 @@ const useStyles = makeStyles()(() => ({
         transform: 'scale(-1, 1)',
     },
 }))
+
+const freeOnStandby = () => {}
+// const [picNowUrl, getNowPicUrl] = usePicAnimate({freeOnStandby});
 
 const PetsDom = () => {
     const classes = useStylesExtends(useStyles(), {})
@@ -88,6 +93,7 @@ const PetsDom = () => {
         <div className={classes.root}>
             {show ? (
                 <Drag
+                    shouldBeAction={() => {}}
                     direction={picDirection}
                     setNewFrame={(pic, isTurn) => setNewFrame(pic, isTurn)}
                     setDirection={(direction, position) => setDirection(direction, position)}>
@@ -98,7 +104,7 @@ const PetsDom = () => {
                             picDirection === Direction.right && classes.turn,
                             picPosition === 2 && classes.imgR,
                         )}
-                        style={{ backgroundImage: `url(${picShow})` }}
+                        // style={{ backgroundImage: `url(${picNowUrl})` }}
                     />
                     <Message />
                     {/* <Tip /> */}

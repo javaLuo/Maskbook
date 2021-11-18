@@ -1,6 +1,5 @@
 import React from 'react'
-import { startAnimate, choseAction, freeOnStandby, onActionsEnd, Direction, stopAnimate } from './petActionAnimate'
-import { getAssetAsBlobURL } from '../../../utils'
+import { startAnimate, choseAction, onActionsEnd, Direction, stopAnimate } from './petActionAnimate'
 
 export type typeCoordinates = {
     x: number
@@ -13,26 +12,23 @@ interface StateProps {
     start: typeCoordinates // 鼠标按下时记录值
     move: typeCoordinates
     prev: typeCoordinates
-    picGroup: string[]
-    picSequence: { s: number[]; t: number }[]
+    // picGroup: string[]
+    // picSequence: { s: number[]; t: number }[]
+    // picType: string,
     petW: number
     petH: number
-    picInfo: { name: string; pics: string[]; sequence: { s: number[]; t: number }[] }[]
+    // picInfo: { name: string; pics: string[]; sequence: { s: number[]; t: number }[] }[]
 }
 
 interface Props {
     direction: Direction
     setNewFrame: (url: string, isTurn: boolean) => void
     setDirection: (direction: Direction, position?: number) => void
+    shouldBeAction: (type: string) => void
 }
 
 let timer: NodeJS.Timeout
-let animateTimer: number
-let picIndex: number = 0
 
-let sequenceNow = 0,
-    sequenceNowTime = 0,
-    sequencePicNow = 0
 class Draggable extends React.PureComponent<Props> {
     ref = React.createRef<HTMLDivElement | null>()
     mouseMoveFuc = this.onMouseMove.bind(this)
@@ -63,72 +59,6 @@ class Draggable extends React.PureComponent<Props> {
             x: 0,
             y: 0,
         },
-        picGroup: [],
-        picSequence: [],
-        picInfo: [
-            {
-                name: 'default',
-                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url))],
-                sequence: [{ s: [0], t: Infinity }],
-            },
-            {
-                name: 'walk',
-                pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
-                ],
-                sequence: [{ s: [0, 1], t: Infinity }],
-            },
-            {
-                name: 'sit',
-                pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame16.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame17.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame37.png', import.meta.url)),
-                ],
-                sequence: [{ s: [0, 1, 2, 3], t: Infinity }],
-            },
-            {
-                name: 'fall',
-                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
-                sequence: [{ s: [0], t: Infinity }],
-            },
-            {
-                name: 'standup',
-                pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
-                ],
-                sequence: [{ s: [0, 1], t: 1 }],
-            },
-            {
-                name: 'drag',
-                pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame9.png', import.meta.url))],
-                sequence: [{ s: [0], t: Infinity }],
-            },
-            {
-                name: 'climb',
-                pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb01.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
-                ],
-                sequence: [{ s: [0, 1], t: Infinity }],
-            },
-            {
-                name: 'sleep',
-                pics: [
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
-                    getAssetAsBlobURL(new URL('../assets/pet_fox/frame21.png', import.meta.url)),
-                ],
-                sequence: [
-                    { s: [0, 1, 1], t: 3 },
-                    { s: [2], t: 50 },
-                    { s: [1, 0], t: 3 },
-                ],
-            },
-        ],
     }
 
     override componentDidMount() {
@@ -183,20 +113,22 @@ class Draggable extends React.PureComponent<Props> {
         if (e.button !== 0) return
         if (!this.ref?.current) return
 
-        this.setState(
-            {
-                dragging: true,
-                start: {
-                    x: e.pageX,
-                    y: e.pageY,
-                },
+        this.setState({
+            dragging: true,
+            start: {
+                x: e.pageX,
+                y: e.pageY,
             },
-            () => this.checkStatus(),
-        )
+        })
     }
 
     onMouseMove(e: MouseEvent) {
         if (!this.state.dragging) return
+        e.stopPropagation()
+        e.preventDefault()
+        // if(this.state.picType !== 'drag'){
+        //     this.props.shouldBeAction('drag');
+        // }
         // 计算当前还能够向左移动多少距离
         const minX = -this.state.pos.x
         const maxX = window.innerWidth - this.state.pos.x - this.state.petW - 20 // 20为滚动条宽度
@@ -218,8 +150,6 @@ class Draggable extends React.PureComponent<Props> {
                 y: 0,
             },
         })
-        e.stopPropagation()
-        e.preventDefault()
     }
 
     onMouseUp(e: MouseEvent) {
@@ -242,97 +172,6 @@ class Draggable extends React.PureComponent<Props> {
         e.preventDefault()
     }
 
-    // 获取当前该显示哪个图片组
-    getNowPicUrl(type: string, isLoop = true, frameTurn = 50) {
-        cancelAnimationFrame(animateTimer)
-        const action = this.state.picInfo.find((item) => item.name === type)
-        this.setState(
-            {
-                picGroup: action?.pics ?? [],
-                picSequence: action?.sequence,
-            },
-            () => {
-                if (['sit'].includes(type)) {
-                    this.animateChangesPicsRandom(
-                        this.state.picGroup,
-                        frameTurn,
-                        frameTurn,
-                        Date.now() + Math.random() * 5000 + 5000,
-                    )
-                } else {
-                    sequenceNow = 0
-                    sequenceNowTime = 0
-                    sequencePicNow = 0
-                    this.animateChangesSquence(this.state.picGroup, frameTurn, frameTurn, this.state.picSequence)
-                }
-
-                if (type === 'default') {
-                    console.log('type等于default了')
-                    freeOnStandby(
-                        3000,
-                        this.state.pos,
-                        this.state.petW,
-                        this.state.petH,
-                        this.beginOneActionPrepare.bind(this),
-                    )
-                }
-            },
-        )
-    }
-
-    // 随机图片组动画循环播放函数
-    animateChangesPicsRandom(group: string[], frame: number, frameTurn: number, endTime: number) {
-        animateTimer = requestAnimationFrame(() => this.animateChangesPicsRandom(group, frame + 1, frameTurn, endTime))
-        if (frame > frameTurn) {
-            if (Date.now() > endTime) {
-                this.getNowPicUrl('default')
-            } else {
-                frame = 0
-                picIndex = Math.round(Math.random() * (this.state.picGroup.length - 1))
-                this.props.setNewFrame(this.state.picGroup[picIndex], Math.random() > 0.7)
-            }
-        }
-    }
-
-    /**
-     * 序列图片组动画循环
-     * @param {string[]} group  图片组
-     * @param {number} frame 帧数
-     * @param {number} frameTurn 帧数该换的值
-     * @param {number[][]} sequence 动画序列 [{s: [1,2,3], t: 1}, {s: [4], t: -1}]， s存group下标， t表示这个序列需要被循环多少次
-     * @param {number} sequenceNow 播放到第几个序列了
-     * @param {number} sequenceNowTime 当前序列播放第几次了
-     * @param {number} sequencePicNow 当前指向当前序列的第几个元素
-     */
-    animateChangesSquence(group: string[], frame: number, frameTurn: number, sequence: { s: number[]; t: number }[]) {
-        let frameNext = frame
-        if (frame > frameTurn) {
-            // 该下一个图了
-            sequencePicNow = sequencePicNow + 1
-            if (sequencePicNow >= sequence[sequenceNow].s.length) {
-                sequencePicNow = 0
-                sequenceNowTime = sequenceNowTime + 1
-                if (sequenceNowTime >= sequence[sequenceNow].t) {
-                    sequenceNowTime = 0
-                    sequenceNow = sequenceNow + 1
-                    if (sequenceNow >= sequence.length) {
-                        console.log('一个动画序列结束')
-                        this.getNowPicUrl('default')
-                        return
-                    }
-                }
-            }
-
-            picIndex = sequence[sequenceNow].s[sequencePicNow]
-            this.props.setNewFrame(this.state.picGroup[picIndex], false)
-            frameNext = 0
-        } else {
-            frameNext = frame + 1
-        }
-
-        animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frameNext, frameTurn, sequence))
-    }
-
     // 检查当前状态，判定应该执行什么动画
     checkStatus() {
         console.log('checkStatus开始判定')
@@ -340,7 +179,7 @@ class Draggable extends React.PureComponent<Props> {
 
         // 如果此时宠物正处于抓住的状态，则替换抓住的图片
         if (this.state.dragging) {
-            this.getNowPicUrl('drag')
+            this.props.shouldBeAction('drag')
             console.log('checkStatus: 判定为拖拽中')
             return
         }
@@ -353,7 +192,7 @@ class Draggable extends React.PureComponent<Props> {
 
         // 如果没有状态命中，则替换默认图片
         console.log('checkStatus没有状态命中，变为default')
-        this.getNowPicUrl('default')
+        this.props.shouldBeAction('default')
     }
 
     // 自动执行某动作时触发指定的动作
@@ -361,7 +200,7 @@ class Draggable extends React.PureComponent<Props> {
         console.log('一个动作被触发：', action)
         switch (action) {
             case 'fall':
-                this.getNowPicUrl('fall')
+                this.props.shouldBeAction('fall')
                 choseAction('fall', {
                     y: this.state.pos.y,
                     petH: this.state.petH,
@@ -376,7 +215,7 @@ class Draggable extends React.PureComponent<Props> {
                 } else {
                     direction = this.state.pos.x < window.innerWidth / 2 ? Direction.right : Direction.left
                 }
-                this.getNowPicUrl('walk', true, 20)
+                this.props.shouldBeAction('walk')
                 this.props.setDirection(direction)
                 choseAction('walk', {
                     x: this.state.pos.x,
@@ -387,10 +226,10 @@ class Draggable extends React.PureComponent<Props> {
                 })
                 break
             case 'sit':
-                this.getNowPicUrl('sit', true, 80)
+                this.props.shouldBeAction('sit')
                 break
             case 'climb':
-                this.getNowPicUrl('climb', true, 30)
+                this.props.shouldBeAction('climb')
                 const isL = this.state.pos.x < window.innerWidth / 2
                 const direction2 = isL ? Direction.right : Direction.left
                 this.props.setDirection(direction2, 2)
@@ -400,7 +239,7 @@ class Draggable extends React.PureComponent<Props> {
                 })
                 break
             case 'sleep':
-                this.getNowPicUrl('sleep', true, 30)
+                this.props.shouldBeAction('sleep')
                 break
         }
     }
@@ -415,7 +254,7 @@ class Draggable extends React.PureComponent<Props> {
         })
 
         if (options.isLast) {
-            this.getNowPicUrl('standup', false, 10)
+            // this.getNowPicUrl('standup', false, 10)
         }
     }
 
@@ -432,7 +271,7 @@ class Draggable extends React.PureComponent<Props> {
             if (options.x <= 1 || options.x >= window.innerWidth - this.state.petW - 21) {
                 this.beginOneActionPrepare('climb')
             } else {
-                this.getNowPicUrl('default')
+                // this.getNowPicUrl('default')
             }
         }
     }
