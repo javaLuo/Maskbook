@@ -13,6 +13,7 @@ interface StateProps {
     start: typeCoordinates // 鼠标按下时记录值
     move: typeCoordinates
     prev: typeCoordinates
+    type: string
     picGroup: string[]
     picSequence: { s: number[]; t: number }[]
     petW: number
@@ -22,7 +23,7 @@ interface StateProps {
 
 interface Props {
     direction: Direction
-    setNewFrame: (url: string, isTurn: boolean) => void
+    setNewFrame: (type: string, url: string, isTurn: boolean) => void
     setDirection: (direction: Direction, position?: number) => void
 }
 
@@ -63,6 +64,7 @@ class Draggable extends React.PureComponent<Props> {
             x: 0,
             y: 0,
         },
+        type: 'defalut',
         picGroup: [],
         picSequence: [],
         picInfo: [
@@ -183,20 +185,20 @@ class Draggable extends React.PureComponent<Props> {
         if (e.button !== 0) return
         if (!this.ref?.current) return
 
-        this.setState(
-            {
-                dragging: true,
-                start: {
-                    x: e.pageX,
-                    y: e.pageY,
-                },
+        this.setState({
+            dragging: true,
+            start: {
+                x: e.pageX,
+                y: e.pageY,
             },
-            () => this.checkStatus(),
-        )
+        })
     }
 
     onMouseMove(e: MouseEvent) {
         if (!this.state.dragging) return
+        if (this.state.type !== 'drag') {
+            this.getNowPicUrl('drag')
+        }
         // 计算当前还能够向左移动多少距离
         const minX = -this.state.pos.x
         const maxX = window.innerWidth - this.state.pos.x - this.state.petW - 20 // 20为滚动条宽度
@@ -248,6 +250,7 @@ class Draggable extends React.PureComponent<Props> {
         const action = this.state.picInfo.find((item) => item.name === type)
         this.setState(
             {
+                type,
                 picGroup: action?.pics ?? [],
                 picSequence: action?.sequence,
             },
@@ -289,7 +292,7 @@ class Draggable extends React.PureComponent<Props> {
             } else {
                 frame = 0
                 picIndex = Math.round(Math.random() * (this.state.picGroup.length - 1))
-                this.props.setNewFrame(this.state.picGroup[picIndex], Math.random() > 0.7)
+                this.props.setNewFrame(this.state.type, this.state.picGroup[picIndex], Math.random() > 0.7)
             }
         }
     }
@@ -324,7 +327,7 @@ class Draggable extends React.PureComponent<Props> {
             }
 
             picIndex = sequence[sequenceNow].s[sequencePicNow]
-            this.props.setNewFrame(this.state.picGroup[picIndex], false)
+            this.props.setNewFrame(this.state.type, this.state.picGroup[picIndex], false)
             frameNext = 0
         } else {
             frameNext = frame + 1

@@ -1,44 +1,54 @@
-import React from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { makeStyles } from '@masknet/theme'
-import { CSSTransition } from 'react-transition-group'
 import { useI18N } from '../../../../utils'
+import classNames from 'classnames'
 
 const useStyles = makeStyles()(() => ({
-    txt: {
+    msgBox: {
         position: 'absolute',
+        top: 0,
+        left: '50%',
+        marginBottom: '-100%',
+        zIndex: 999,
+        maxWidth: '300px',
+        minWidth: '160px',
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        boxShadow: '0 0 8px #ddd',
         opacity: 0,
-        top: -40,
-        fontSize: '12px',
-        color: '#737373',
-        fontWeight: 600,
-        width: '150%',
-        fontFamily: 'TwitterChirp',
         pointerEvents: 'none',
+        transition: 'opacity 200ms, margin-left 100ms',
+        padding: '12px',
+        fontSize: '13px',
+        color: '#222',
+        transform: 'translate(-50%, -100%)',
+        textAlign: 'center',
+        '&:before': {
+            content: '""',
+            width: '10px',
+            height: '10px',
+            backgroundColor: '#fff',
+            position: 'absolute',
+            bottom: '-6px',
+            left: '50%',
+            boxShadow: '5px 5px 8px #ccc',
+            transform: 'translateX(-50%) rotate(45deg)',
+        },
     },
-    enter: {
-        left: 150,
-        opacity: 0,
-    },
-    enterActive: {
-        left: 0,
+    wordShow: {
         opacity: 1,
-        transition: 'all 1500ms ease-in',
-    },
-    enterDone: {
-        left: 0,
-        opacity: 1,
-    },
-    exitActive: {
-        left: 150,
-        opacity: 0,
-        transition: 'all 1500ms ease-out',
     },
 }))
 
-const AnimatedMessage = () => {
+type Props = {
+    isStop: boolean
+}
+
+let timer: NodeJS.Timeout
+const AnimatedMessage = (props: Props) => {
     const { t } = useI18N()
     const { classes } = useStyles()
-    const [start, setStart] = React.useState(false)
+
     const txts = [
         t('plugin_pets_loot_des_0'),
         t('plugin_pets_loot_des_1'),
@@ -57,48 +67,58 @@ const AnimatedMessage = () => {
         t('plugin_pets_loot_des_14'),
     ]
 
-    const [show, setShow] = React.useState(txts[0])
-
-    React.useEffect(() => {
-        let count = 0
-        const timer = setInterval(() => {
-            setStart(count % 9 < 5)
-            count = count + 1
-        }, 1000 * 1)
-        return () => {
-            clearInterval(timer)
+    const [show, setShow] = useState(false)
+    const [txt, setTxt] = useState(txts[0])
+    const boxRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        console.log('一进来就触发？')
+        clearTimeout(timer)
+        if (props.isStop) {
+            setShow(false)
+        } else {
+            randomTxtTimer()
         }
-    }, [])
-
-    React.useEffect(() => {
-        if (start) return
-        const timer = setTimeout(() => {
-            const idx = Math.round(Math.random() * (txts.length - 1))
-            setShow(txts[idx])
-        }, 1500)
         return () => {
-            clearInterval(timer)
+            clearTimeout(timer)
         }
-    }, [start])
+    }, [props.isStop])
+
+    const [left, setLeft] = useState(0)
+    function randomTxtTimer() {
+        timer = setTimeout(() => {
+            setTxt(txts[Math.floor(Math.random() * (txts.length - 1) + 1) - 1])
+
+            setShow(true)
+
+            setTimeout(() => {
+                if (boxRef?.current) {
+                    const rect = boxRef.current.getBoundingClientRect()
+                    if (rect.left < 0) {
+                        setLeft(-rect.left)
+                    } else if (rect.left > window.innerWidth) {
+                        setLeft(-(rect.left - window.innerWidth))
+                    } else {
+                        setLeft(0)
+                    }
+                }
+            })
+
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                setShow(false)
+                randomTxtTimer()
+            }, 5000)
+            console.log('文字显示', txt)
+        }, (Math.random() * 10 + 2) * 1000)
+    }
 
     return (
-        <CSSTransition
-            in={start}
-            timeout={{
-                appear: 1000,
-                enter: 1200,
-                exit: 1200,
-            }}
-            classNames={{
-                enter: classes.enter,
-                enterActive: classes.enterActive,
-                enterDone: classes.enterDone,
-                exit: classes.enterDone,
-                exitActive: classes.exitActive,
-                exitDone: classes.enter,
-            }}>
-            <div className={classes.txt}>{show}</div>
-        </CSSTransition>
+        <div
+            ref={boxRef}
+            style={{ marginLeft: `${left}px` }}
+            className={classNames(classes.msgBox, show && classes.wordShow)}>
+            {txt}
+        </div>
     )
 }
 

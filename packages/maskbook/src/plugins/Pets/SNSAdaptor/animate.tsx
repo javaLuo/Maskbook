@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
 import Drag from './drag'
@@ -51,7 +51,7 @@ const PetsDom = () => {
     const classes = useStylesExtends(useStyles(), {})
 
     const [show, setShow] = useState(true)
-
+    const [actionType, setActionType] = useState('')
     const identity = useCurrentVisitingIdentity()
     useEffect(() => {
         const userId = identity.identifier.userId
@@ -72,24 +72,30 @@ const PetsDom = () => {
         setShow(false)
     }
 
-    // 新的一帧
-    const setNewFrame = (pic: string, isTurn: boolean) => {
+    // 新的一帧 设置图片 和 图片的朝向
+    const setNewFrame = (type: string, pic: string, isTurn: boolean) => {
+        setActionType(type)
         setPicShow(pic)
         isTurn && setPicDirection(picDirection === Direction.left ? Direction.right : Direction.left)
     }
 
-    // 设置各个方位
+    // 设置图片的朝向 和 图片相对刚体的位置
     const setDirection = (direction: Direction, position: number = 0) => {
         setPicDirection(direction)
         setPicPosition(position)
     }
+
+    // 是否应该停止消息显示
+    const isStopMsg = useMemo(() => {
+        return ['drag', 'climb'].includes(actionType)
+    }, [actionType])
 
     return (
         <div className={classes.root}>
             {show ? (
                 <Drag
                     direction={picDirection}
-                    setNewFrame={(pic, isTurn) => setNewFrame(pic, isTurn)}
+                    setNewFrame={(type, pic, isTurn) => setNewFrame(type, pic, isTurn)}
                     setDirection={(direction, position) => setDirection(direction, position)}>
                     <div
                         className={classNames(
@@ -100,7 +106,7 @@ const PetsDom = () => {
                         )}
                         style={{ backgroundImage: `url(${picShow})` }}
                     />
-                    <Message />
+                    <Message isStop={isStopMsg} />
                     {/* <Tip /> */}
                     <Control isShow={isControlShow} onClosePet={() => onClosePet()} />
                 </Drag>
