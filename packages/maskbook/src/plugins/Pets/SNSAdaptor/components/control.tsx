@@ -1,4 +1,3 @@
-import React from 'react'
 import { useState } from 'react'
 import { makeStyles } from '@masknet/theme'
 import classNames from 'classnames'

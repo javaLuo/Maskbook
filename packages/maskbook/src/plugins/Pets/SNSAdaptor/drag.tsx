@@ -1,5 +1,14 @@
 import React from 'react'
-import { startAnimate, choseAction, freeOnStandby, onActionsEnd, Direction, stopAnimate } from './petActionAnimate'
+import {
+    startAnimate,
+    choseAction,
+    freeOnStandby,
+    onActionsEnd,
+    Direction,
+    stopAnimate,
+    pauseAnimate,
+    restore,
+} from './petActionAnimate'
 import { getAssetAsBlobURL } from '../../../utils'
 
 export type typeCoordinates = {
@@ -7,13 +16,15 @@ export type typeCoordinates = {
     y: number
 }
 
-interface StateProps {
+interface State {
     dragging: boolean // 是否正在抓取
     pos: typeCoordinates
     start: typeCoordinates // 鼠标按下时记录值
     move: typeCoordinates
     prev: typeCoordinates
     type: string
+    isClick: boolean
+    isPause: boolean
     picGroup: string[]
     picSequence: { s: number[]; t: number }[]
     petW: number
@@ -25,6 +36,7 @@ interface Props {
     direction: Direction
     setNewFrame: (type: string, url: string, isTurn: boolean) => void
     setDirection: (direction: Direction, position?: number) => void
+    onMenuToggle: (type: boolean, pos?: { x: number; y: number }) => void
 }
 
 let timer: NodeJS.Timeout
@@ -39,8 +51,8 @@ class Draggable extends React.PureComponent<Props> {
     mouseMoveFuc = this.onMouseMove.bind(this)
     mouseUpFuc = this.onMouseUp.bind(this)
     windowResize = this.onWindowResize.bind(this)
-
-    override state: StateProps = {
+    documentClick = this.onDocmentClick.bind(this)
+    override state: State = {
         dragging: false,
         petW: 128,
         petH: 128,
@@ -65,6 +77,8 @@ class Draggable extends React.PureComponent<Props> {
             y: 0,
         },
         type: 'defalut',
+        isClick: false,
+        isPause: false, // 是否暂停
         picGroup: [],
         picSequence: [],
         picInfo: [
@@ -147,7 +161,7 @@ class Draggable extends React.PureComponent<Props> {
         )
     }
 
-    override componentDidUpdate(_props: any, state: StateProps) {
+    override componentDidUpdate(_props: any, state: State) {
         if (this.state.dragging && !state.dragging) {
             document.addEventListener('mousemove', this.mouseMoveFuc)
             document.addEventListener('mouseup', this.mouseUpFuc)
@@ -191,13 +205,19 @@ class Draggable extends React.PureComponent<Props> {
                 x: e.pageX,
                 y: e.pageY,
             },
+            isClick: true,
         })
     }
 
     onMouseMove(e: MouseEvent) {
         if (!this.state.dragging) return
         if (this.state.type !== 'drag') {
-            this.getNowPicUrl('drag')
+            // this.getNowPicUrl('drag')
+            this.checkStatus()
+        }
+        if (this.state.isPause) {
+            this.onResove()
+            this.props.onMenuToggle(false)
         }
         // 计算当前还能够向左移动多少距离
         const minX = -this.state.pos.x
@@ -219,12 +239,35 @@ class Draggable extends React.PureComponent<Props> {
                 x: e.pageX,
                 y: 0,
             },
+            isClick: false,
         })
         e.stopPropagation()
         e.preventDefault()
     }
 
+    // 暂停动画和图片 - menu出现
+    onPause() {
+        pauseAnimate()
+        this.setState({
+            isPause: true,
+        })
+        document.addEventListener('mouseup', this.documentClick, false)
+    }
+
+    // 恢复 - menu消失
+    onResove() {
+        restore()
+        this.setState({
+            isPause: false,
+        })
+        document.removeEventListener('mouseup', this.documentClick, false)
+    }
+
     onMouseUp(e: MouseEvent) {
+        if (this.state.isClick) {
+            this.onPause()
+            this.props.onMenuToggle(true, this.state.pos)
+        }
         this.setState(
             {
                 dragging: false,
@@ -236,12 +279,19 @@ class Draggable extends React.PureComponent<Props> {
                     x: 0,
                     y: 0,
                 },
+                isClick: false,
             },
             () => this.checkStatus(),
         )
 
         e.stopPropagation()
         e.preventDefault()
+    }
+
+    // 用户点击文档中空白区域，收起菜单
+    onDocmentClick() {
+        this.onResove()
+        this.props.onMenuToggle(false, this.state.pos)
     }
 
     // 获取当前该显示哪个图片组
@@ -308,6 +358,11 @@ class Draggable extends React.PureComponent<Props> {
      * @param {number} sequencePicNow 当前指向当前序列的第几个元素
      */
     animateChangesSquence(group: string[], frame: number, frameTurn: number, sequence: { s: number[]; t: number }[]) {
+        if (this.state.isPause) {
+            animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frame, frameTurn, sequence))
+            return
+        }
+
         let frameNext = frame
         if (frame > frameTurn) {
             // 该下一个图了
@@ -319,7 +374,7 @@ class Draggable extends React.PureComponent<Props> {
                     sequenceNowTime = 0
                     sequenceNow = sequenceNow + 1
                     if (sequenceNow >= sequence.length) {
-                        console.log('一个动画序列结束')
+                        // 一个动画序列结束
                         this.getNowPicUrl('default')
                         return
                     }
@@ -332,7 +387,6 @@ class Draggable extends React.PureComponent<Props> {
         } else {
             frameNext = frame + 1
         }
-
         animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frameNext, frameTurn, sequence))
     }
 
@@ -457,12 +511,26 @@ class Draggable extends React.PureComponent<Props> {
         }
     }
 
+    onShowMenu(e: React.MouseEvent) {
+        e.stopPropagation()
+        e.preventDefault()
+        this.onPause()
+        this.props.onMenuToggle(true, this.state.pos)
+        return false
+    }
+
+    onDivClick(e: React.MouseEvent) {
+        e.nativeEvent.stopPropagation()
+    }
+
     override render() {
         return (
             <div
                 //@ts-ignore
                 ref={this.ref}
                 onMouseDown={this.onMouseDown.bind(this)}
+                onContextMenu={this.onShowMenu.bind(this)}
+                onClick={this.onDivClick.bind(this)}
                 style={{
                     position: 'fixed',
                     top: this.state.pos.y + this.state.move.y,

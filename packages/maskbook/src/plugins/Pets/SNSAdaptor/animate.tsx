@@ -1,12 +1,15 @@
 import { useEffect, useState, useMemo } from 'react'
 import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
-import Drag from './drag'
-import Message from './components/animatedMsg'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
 import classNames from 'classnames'
+
+import Drag from './drag'
+import Message from './components/animatedMsg'
 import Control from './components/control'
-import { Direction } from './petActions'
+import RightMenu from './components/rightMenu'
+import { Direction } from './petActionAnimate'
+
 const useStyles = makeStyles()(() => ({
     root: {
         position: 'fixed',
@@ -90,13 +93,23 @@ const PetsDom = () => {
         return ['drag', 'climb'].includes(actionType)
     }, [actionType])
 
+    const [isMenuShow, setMenuShow] = useState(false)
+    const [pos, setPos] = useState({ x: 0, y: 0 })
+    const onMenuToggle = (type: boolean, pos?: { x: number; y: number }) => {
+        setMenuShow(type)
+        if (pos) {
+            setPos(pos)
+        }
+    }
+
     return (
         <div className={classes.root}>
             {show ? (
                 <Drag
                     direction={picDirection}
                     setNewFrame={(type, pic, isTurn) => setNewFrame(type, pic, isTurn)}
-                    setDirection={(direction, position) => setDirection(direction, position)}>
+                    setDirection={(direction, position) => setDirection(direction, position)}
+                    onMenuToggle={(type, pos) => onMenuToggle(type, pos)}>
                     <div
                         className={classNames(
                             classes.img,
@@ -107,8 +120,8 @@ const PetsDom = () => {
                         style={{ backgroundImage: `url(${picShow})` }}
                     />
                     <Message isStop={isStopMsg} />
-                    {/* <Tip /> */}
                     <Control isShow={isControlShow} onClosePet={() => onClosePet()} />
+                    <RightMenu isShow={isMenuShow} pos={pos} />
                 </Drag>
             ) : null}
         </div>

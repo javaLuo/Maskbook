@@ -11,16 +11,18 @@ let type: string
 // 动作循环器
 export const startAnimate = () => {
     animateId = requestAnimationFrame(startAnimate)
-    switch (type) {
-        case 'fall':
-            onPetFallAction()
-            break
-        case 'walk':
-            onPetWalkAction()
-            break
-        case 'climb':
-            onPetClimbAction()
-            break
+    if (!isPause) {
+        switch (type) {
+            case 'fall':
+                onPetFallAction()
+                break
+            case 'walk':
+                onPetWalkAction()
+                break
+            case 'climb':
+                onPetClimbAction()
+                break
+        }
     }
 }
 
@@ -30,6 +32,17 @@ export const stopAnimate = () => {
     clearTimeout(freeTimer)
     type = 'default'
     options = optionsDefault
+}
+
+// 暂停
+let isPause: boolean
+export const pauseAnimate = () => {
+    isPause = true
+}
+
+// 恢复
+export const restore = () => {
+    isPause = false
 }
 
 // 选择执行一个动作
@@ -161,4 +174,6 @@ export default {
     choseAction,
     freeOnStandby,
     onActionsEnd,
+    pauseAnimate,
+    restore,
 }
