@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { makeStyles } from '@masknet/theme'
 import { useStylesExtends } from '@masknet/shared'
 import { useCurrentVisitingIdentity } from '../../../components/DataSource/useActivatedUI'
+import { getAssetAsBlobURL } from '../../../utils'
 import classNames from 'classnames'
 
 import Drag from './drag'
@@ -52,6 +53,83 @@ const useStyles = makeStyles()(() => ({
 
 const PetsDom = () => {
     const classes = useStylesExtends(useStyles(), {})
+
+    const [picInfo, setPicInfo] = useState([
+        {
+            name: 'default',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url))],
+            sequence: [{ s: [0], t: Infinity }],
+        },
+        {
+            name: 'stand',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url))],
+            sequence: [{ s: [0], t: Infinity }],
+        },
+        {
+            name: 'walk',
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0, 1], t: Infinity }],
+        },
+        {
+            name: 'sit',
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame16.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame17.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame37.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0, 1, 2, 3], t: Infinity }],
+        },
+        {
+            name: 'fall',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
+            sequence: [{ s: [0], t: Infinity }],
+        },
+        {
+            name: 'standup',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url))],
+            sequence: [{ s: [0], t: 1 }],
+        },
+        {
+            name: 'drag',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame9.png', import.meta.url))],
+            sequence: [{ s: [0], t: Infinity }],
+        },
+        {
+            name: 'climb',
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb01.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0, 1], t: Infinity }],
+        },
+        {
+            name: 'sleep',
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_fox/frame21.png', import.meta.url)),
+            ],
+            sequence: [
+                { s: [0, 1, 1], t: 3 },
+                { s: [2], t: 50 },
+                { s: [1, 0], t: 3 },
+            ],
+        },
+        {
+            name: 'shift',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame22.png', import.meta.url))],
+            sequence: [{ s: [0], t: Infinity }],
+        },
+        {
+            name: 'shiftend',
+            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame29.png', import.meta.url))],
+            sequence: [{ s: [0], t: 1 }],
+        },
+    ])
 
     const [show, setShow] = useState(true)
     const [actionType, setActionType] = useState('')
@@ -115,8 +193,10 @@ const PetsDom = () => {
         <div className={classes.root}>
             {show ? (
                 <Drag
+                    picInfo={picInfo}
                     direction={picDirection}
                     menuAction={menuAction}
+                    isMenuShow={isMenuShow}
                     setNewFrame={(type, pic, isTurn) => setNewFrame(type, pic, isTurn)}
                     setDirection={(direction, position) => setDirection(direction, position)}
                     onMenuToggle={(type, pos) => onMenuToggle(type, pos)}

@@ -21,7 +21,7 @@ const useStyles = makeStyles()(() => ({
         backgroundColor: '#fff',
         opacity: 0,
         zIndex: 999,
-        transition: 'opacity 100ms',
+        transition: 'opacity 50ms',
         animation: 'menu-show 0.5s both',
         borderRadius: '12px',
         margin: 0,

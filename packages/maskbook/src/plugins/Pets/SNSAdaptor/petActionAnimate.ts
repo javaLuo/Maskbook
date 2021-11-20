@@ -11,6 +11,7 @@ let type: string
 // 动作循环器
 export const startAnimate = () => {
     animateId = requestAnimationFrame(startAnimate)
+
     if (!isPause) {
         switch (type) {
             case 'fall':
@@ -21,6 +22,12 @@ export const startAnimate = () => {
                 break
             case 'climb':
                 onPetClimbAction()
+                break
+            case 'shift':
+                onPetShiftAction()
+                break
+            case 'stand':
+                onPetsStandFollowAction()
                 break
         }
     }
@@ -88,7 +95,7 @@ export const freeOnStandby = (
         const r = Math.random()
 
         const choseAction = freeActions[Math.floor(r * freeActions.length + 1) - 1]
-        console.log('选中了什么动作：', choseAction, freeActions, r)
+
         callback(choseAction)
     }, delay)
 }
@@ -165,6 +172,42 @@ const onPetClimbAction = () => {
     options.callback({ y: options.y })
 
     options.y -= 1
+}
+
+/**
+ * 宠物跳跃
+ * @params {number} 起始x
+ * @params {number} 起始y
+ * @params {number} 控制点x
+ * @params {number} 控制点y
+ * @params {number} 目标X
+ * @params {number} 目标y
+ * @params {number} 当前帧z
+ */
+const onPetShiftAction = () => {
+    if (options.z >= 60) {
+        options.callback({
+            x: options.resX,
+            y: options.resY,
+            isLast: true,
+        })
+        return
+    }
+    const t = options.z / 60
+    const x = Math.pow(1 - t, 2) * options.x + 2 * t * (1 - t) * options.cx + Math.pow(t, 2) * options.resX
+    const y = Math.pow(1 - t, 2) * options.y + 2 * t * (1 - t) * options.cy + Math.pow(t, 2) * options.resY
+
+    options.callback({ x, y })
+    options.z += 1
+}
+
+// 宠物stand 跟随
+const onPetsStandFollowAction = () => {
+    const rect = options.domPrev.getBoundingClientRect()
+    options.callback({
+        x: rect.left + rect.width / 2 - options.petW / 2,
+        y: rect.top - options.petH + 8,
+    })
 }
 
 export default {

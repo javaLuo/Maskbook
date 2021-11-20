@@ -34,9 +34,34 @@ const useStyles = makeStyles()(() => ({
             boxShadow: '5px 5px 8px #ccc',
             transform: 'translateX(-50%) rotate(45deg)',
         },
+
+        '@keyframes word-show': {
+            '0%': {
+                transform: 'translate(-50%, -100%) scale3d(1, 1, 1)',
+            },
+            '30%': {
+                transform: 'translate(-50%, -100%) scale3d(1.25, 0.75, 1)',
+            },
+            '40%': {
+                transform: 'translate(-50%, -100%) scale3d(0.75, 1.25, 1)',
+            },
+            '50%': {
+                transform: 'translate(-50%, -100%) scale3d(1.15, 0.85, 1)',
+            },
+            '65%': {
+                transform: 'translate(-50%, -100%) scale3d(0.95, 1.05, 1)',
+            },
+            '75%': {
+                transform: 'translate(-50%, -100%) scale3d(1.05, 0.95, 1)',
+            },
+            '100%': {
+                transform: 'translate(-50%, -100%) scale3d(1, 1, 1)',
+            },
+        },
     },
     wordShow: {
         opacity: 1,
+        animation: 'word-show 0.9s both;',
     },
 }))
 
@@ -71,7 +96,6 @@ const AnimatedMessage = (props: Props) => {
     const [txt, setTxt] = useState(txts[0])
     const boxRef = useRef<HTMLDivElement>(null)
     useEffect(() => {
-        console.log('一进来就触发？')
         clearTimeout(timer)
         if (props.isStop) {
             setShow(false)
@@ -108,8 +132,7 @@ const AnimatedMessage = (props: Props) => {
                 setShow(false)
                 randomTxtTimer()
             }, 5000)
-            console.log('文字显示', txt)
-        }, (Math.random() * 10 + 2) * 1000)
+        }, (Math.random() * 10 + 4) * 1000)
     }
 
     return (
