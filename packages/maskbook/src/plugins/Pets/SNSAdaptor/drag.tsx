@@ -17,7 +17,7 @@ export type typeCoordinates = {
 }
 
 interface State {
-    dragging: boolean // 是否正在抓取
+    dragging: boolean // 鼠标左键是否按下
     pos: typeCoordinates
     start: typeCoordinates // 鼠标按下时记录值
     move: typeCoordinates
@@ -30,13 +30,18 @@ interface State {
     petW: number
     petH: number
     picInfo: { name: string; pics: string[]; sequence: { s: number[]; t: number }[] }[]
+    transform: string
+    isControl: boolean
+    opacity: number
 }
 
 interface Props {
     direction: Direction
+    menuAction: string
     setNewFrame: (type: string, url: string, isTurn: boolean) => void
     setDirection: (direction: Direction, position?: number) => void
     onMenuToggle: (type: boolean, pos?: { x: number; y: number }) => void
+    setMenuTypeReset: () => void
 }
 
 let timer: NodeJS.Timeout
@@ -76,7 +81,10 @@ class Draggable extends React.PureComponent<Props> {
             x: 0,
             y: 0,
         },
+        transform: '',
+        opacity: 1,
         type: 'defalut',
+        isControl: true, // 是否能被控制，有的时候需要锁定不让操作
         isClick: false,
         isPause: false, // 是否暂停
         picGroup: [],
@@ -163,17 +171,24 @@ class Draggable extends React.PureComponent<Props> {
 
     override componentDidUpdate(_props: any, state: State) {
         if (this.state.dragging && !state.dragging) {
-            document.addEventListener('mousemove', this.mouseMoveFuc)
-            document.addEventListener('mouseup', this.mouseUpFuc)
+            document.addEventListener('mousemove', this.mouseMoveFuc, false)
+            document.addEventListener('mouseup', this.mouseUpFuc, false)
+            console.log('绑定事件')
         } else if (!this.state.dragging && state.dragging) {
-            document.removeEventListener('mousemove', this.mouseMoveFuc)
-            document.removeEventListener('mouseup', this.mouseUpFuc)
+            console.log('取消事件')
+            document.removeEventListener('mousemove', this.mouseMoveFuc, false)
+            document.removeEventListener('mouseup', this.mouseUpFuc, false)
+        }
+
+        if (this.props.menuAction && _props.menuAction !== this.props.menuAction) {
+            console.log('触发菜单动作')
+            this.onMenuAction(this.props.menuAction)
         }
     }
     override componentWillUnmount() {
         stopAnimate()
-        document.removeEventListener('mousemove', this.mouseMoveFuc)
-        document.removeEventListener('mouseup', this.mouseUpFuc)
+        document.removeEventListener('mousemove', this.mouseMoveFuc, false)
+        document.removeEventListener('mouseup', this.mouseUpFuc, false)
         window.removeEventListener('resize', this.windowResize)
     }
 
@@ -212,7 +227,6 @@ class Draggable extends React.PureComponent<Props> {
     onMouseMove(e: MouseEvent) {
         if (!this.state.dragging) return
         if (this.state.type !== 'drag') {
-            // this.getNowPicUrl('drag')
             this.checkStatus()
         }
         if (this.state.isPause) {
@@ -291,13 +305,14 @@ class Draggable extends React.PureComponent<Props> {
     // 用户点击文档中空白区域，收起菜单
     onDocmentClick() {
         this.onResove()
-        this.props.onMenuToggle(false, this.state.pos)
+        this.props.onMenuToggle(false)
     }
 
-    // 获取当前该显示哪个图片组
+    // 获取当前该显示哪个图片组 并开始动画帧循环
     getNowPicUrl(type: string, isLoop = true, frameTurn = 50) {
         cancelAnimationFrame(animateTimer)
         const action = this.state.picInfo.find((item) => item.name === type)
+        console.log('但是应该换成了climb')
         this.setState(
             {
                 type,
@@ -338,7 +353,7 @@ class Draggable extends React.PureComponent<Props> {
         animateTimer = requestAnimationFrame(() => this.animateChangesPicsRandom(group, frame + 1, frameTurn, endTime))
         if (frame > frameTurn) {
             if (Date.now() > endTime) {
-                this.getNowPicUrl('default')
+                this.beginOneActionPrepare('default')
             } else {
                 frame = 0
                 picIndex = Math.round(Math.random() * (this.state.picGroup.length - 1))
@@ -365,7 +380,6 @@ class Draggable extends React.PureComponent<Props> {
 
         let frameNext = frame
         if (frame > frameTurn) {
-            // 该下一个图了
             sequencePicNow = sequencePicNow + 1
             if (sequencePicNow >= sequence[sequenceNow].s.length) {
                 sequencePicNow = 0
@@ -374,8 +388,9 @@ class Draggable extends React.PureComponent<Props> {
                     sequenceNowTime = 0
                     sequenceNow = sequenceNow + 1
                     if (sequenceNow >= sequence.length) {
-                        // 一个动画序列结束
-                        this.getNowPicUrl('default')
+                        // 一个动画序列结束 意味着一个动作结束，一般动画序列是无限循环的，动作结束依靠动作位移序列判定
+                        // 但也有一些动作是没有位移的，依靠动画序列判定
+                        this.beginOneActionPrepare('default')
                         return
                     }
                 }
@@ -393,12 +408,10 @@ class Draggable extends React.PureComponent<Props> {
     // 检查当前状态，判定应该执行什么动画
     checkStatus() {
         console.log('checkStatus开始判定')
-        onActionsEnd()
 
         // 如果此时宠物正处于抓住的状态，则替换抓住的图片
         if (this.state.dragging) {
-            this.getNowPicUrl('drag')
-            console.log('checkStatus: 判定为拖拽中')
+            this.beginOneActionPrepare('drag')
             return
         }
 
@@ -408,15 +421,21 @@ class Draggable extends React.PureComponent<Props> {
             return
         }
 
-        // 如果没有状态命中，则替换默认图片
-        console.log('checkStatus没有状态命中，变为default')
-        this.getNowPicUrl('default')
+        // 如果没有状态命中，则开始默认动作
+        this.beginOneActionPrepare('default')
     }
 
-    // 自动执行某动作时触发指定的动作
-    beginOneActionPrepare(action: string) {
+    // 开始执行某动作，触发指定的动作位移循环
+    beginOneActionPrepare(action: string, menuActionInfo?: { x: number; y: number; next: string }) {
         console.log('一个动作被触发：', action)
+        onActionsEnd()
         switch (action) {
+            case 'default':
+                this.getNowPicUrl('default')
+                break
+            case 'drag':
+                this.getNowPicUrl('drag')
+                break
             case 'fall':
                 this.getNowPicUrl('fall')
                 choseAction('fall', {
@@ -457,7 +476,44 @@ class Draggable extends React.PureComponent<Props> {
                 })
                 break
             case 'sleep':
+                this.setState({
+                    pos: {
+                        x: this.state.pos.x,
+                        y: window.innerHeight - this.state.petH,
+                    },
+                })
                 this.getNowPicUrl('sleep', true, 30)
+                break
+            case 'standup':
+                this.getNowPicUrl('standup', false, 10)
+                break
+            case 'transfer':
+                if (!menuActionInfo) {
+                    return
+                }
+                this.getNowPicUrl('fall') // 传送时用的图片，暂时和fall一样
+                this.setState({
+                    isControl: false,
+                    transform: 'scale(0,0)',
+                    opacity: 0,
+                })
+
+                setTimeout(() => {
+                    this.setState(
+                        {
+                            isControl: true,
+                            transform: 'scale(1,1)',
+                            opacity: 1,
+                            pos: {
+                                x: menuActionInfo.x,
+                                y: menuActionInfo.y,
+                            },
+                        },
+                        () => {
+                            this.beginOneActionPrepare(menuActionInfo.next)
+                        },
+                    )
+                }, 300)
                 break
         }
     }
@@ -472,7 +528,7 @@ class Draggable extends React.PureComponent<Props> {
         })
 
         if (options.isLast) {
-            this.getNowPicUrl('standup', false, 10)
+            this.beginOneActionPrepare('standup')
         }
     }
 
@@ -489,7 +545,7 @@ class Draggable extends React.PureComponent<Props> {
             if (options.x <= 1 || options.x >= window.innerWidth - this.state.petW - 21) {
                 this.beginOneActionPrepare('climb')
             } else {
-                this.getNowPicUrl('default')
+                this.beginOneActionPrepare('default')
             }
         }
     }
@@ -504,9 +560,6 @@ class Draggable extends React.PureComponent<Props> {
         })
 
         if (options.isLast) {
-            console.log('爬墙结束')
-            // 开始倒立
-            // this.getNowPicUrl('fall')
             this.checkStatus()
         }
     }
@@ -519,8 +572,45 @@ class Draggable extends React.PureComponent<Props> {
         return false
     }
 
+    // 阻止冒泡，因为全局有右键菜单
     onDivClick(e: React.MouseEvent) {
         e.nativeEvent.stopPropagation()
+    }
+
+    // 菜单动作处理
+    onMenuAction(type: string) {
+        console.log('大哥你不一样？', type, this.state.type)
+        this.onResove()
+        this.props.onMenuToggle(false)
+        this.props.setMenuTypeReset()
+        if (type === this.state.type) {
+            return
+        }
+        switch (type) {
+            case 'reset':
+                this.beginOneActionPrepare('transfer', {
+                    x: window.innerWidth - this.state.petW - 50,
+                    y: window.innerHeight / 3,
+                    next: 'fall',
+                })
+                break
+            case 'climb':
+                const x = this.state.pos.x < window.innerWidth / 2 ? 0 : window.innerWidth - this.state.petW
+                const y = window.innerHeight - this.state.petH
+                this.beginOneActionPrepare('transfer', { x, y, next: 'climb' })
+                break
+            case 'sleep':
+                if (this.state.pos.y < window.innerHeight - this.state.petH - 2) {
+                    this.beginOneActionPrepare('transfer', {
+                        x: this.state.pos.x,
+                        y: window.innerHeight - this.state.petH,
+                        next: 'sleep',
+                    })
+                } else {
+                    this.beginOneActionPrepare('sleep')
+                }
+                break
+        }
     }
 
     override render() {
@@ -537,6 +627,10 @@ class Draggable extends React.PureComponent<Props> {
                     left: this.state.pos.x + this.state.move.x,
                     width: this.state.petW,
                     height: this.state.petH,
+                    transform: this.state.transform,
+                    opacity: this.state.opacity,
+                    pointerEvents: this.state.isControl ? 'auto' : 'none',
+                    transition: 'opacity 200ms, transform 300ms',
                 }}>
                 {this.props.children || null}
             </div>

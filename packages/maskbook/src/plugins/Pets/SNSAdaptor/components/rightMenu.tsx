@@ -6,6 +6,7 @@ import { getAssetAsBlobURL } from '../../../../utils'
 type Props = {
     isShow: boolean
     pos: { x: number; y: number }
+    onClickMenu: (type: string) => void
 }
 
 const useStyles = makeStyles()(() => ({
@@ -46,7 +47,7 @@ const useStyles = makeStyles()(() => ({
                 borderRadius: '12px 12px 0 0',
             },
             '&:last-child': {
-                borderRadius: '12px 12px 0 0',
+                borderRadius: '0 0 12px 12px',
             },
         },
     },
@@ -142,24 +143,34 @@ function RightMenu(props: Props) {
         }
     }, [isBoxShow])
 
+    function onClickMenu(type: string) {
+        props.onClickMenu(type)
+    }
+
+    function stopPop(e: React.MouseEvent) {
+        e.stopPropagation()
+        e.nativeEvent.stopPropagation()
+    }
     return (
         <div
+            onMouseDown={stopPop}
+            onMouseUp={stopPop}
             className={classNames(
                 classes.menu,
                 props.isShow && classes.show,
                 isLeft && classes.isLeft,
                 isBottom && classes.isBottom,
             )}>
-            <div>
+            <div onClick={() => onClickMenu('reset')}>
                 <span>Reset</span>
             </div>
-            <div>
+            <div onClick={() => onClickMenu('climb')}>
                 <span>Climb</span>
             </div>
-            <div>
+            <div onClick={() => onClickMenu('sleep')}>
                 <span>Sleep</span>
             </div>
-            <div>
+            <div onClick={() => onClickMenu('shift')}>
                 <span>Shift</span>
             </div>
             <div
@@ -198,7 +209,7 @@ function RightMenu(props: Props) {
                     </ul>
                 </div>
             </div>
-            <div>
+            <div onClick={() => onClickMenu('closure')}>
                 <span>Closure</span>
             </div>
         </div>

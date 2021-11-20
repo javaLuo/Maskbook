@@ -102,14 +102,25 @@ const PetsDom = () => {
         }
     }
 
+    const [menuAction, setMenuAction] = useState('default')
+    const onClickMenu = (type: string) => {
+        if (type === 'closure') {
+            onClosePet()
+        } else {
+            setMenuAction(type)
+        }
+    }
+
     return (
         <div className={classes.root}>
             {show ? (
                 <Drag
                     direction={picDirection}
+                    menuAction={menuAction}
                     setNewFrame={(type, pic, isTurn) => setNewFrame(type, pic, isTurn)}
                     setDirection={(direction, position) => setDirection(direction, position)}
-                    onMenuToggle={(type, pos) => onMenuToggle(type, pos)}>
+                    onMenuToggle={(type, pos) => onMenuToggle(type, pos)}
+                    setMenuTypeReset={() => setMenuAction('')}>
                     <div
                         className={classNames(
                             classes.img,
@@ -121,7 +132,7 @@ const PetsDom = () => {
                     />
                     <Message isStop={isStopMsg} />
                     <Control isShow={isControlShow} onClosePet={() => onClosePet()} />
-                    <RightMenu isShow={isMenuShow} pos={pos} />
+                    <RightMenu isShow={isMenuShow} pos={pos} onClickMenu={(type) => onClickMenu(type)} />
                 </Drag>
             ) : null}
         </div>
