@@ -7,7 +7,6 @@ import classNames from 'classnames'
 
 import Drag from './drag'
 import Message from './components/animatedMsg'
-import Control from './components/control'
 import RightMenu from './components/rightMenu'
 import { Direction } from './petActionAnimate'
 
@@ -140,15 +139,10 @@ const PetsDom = () => {
         setShow(userId === maskId)
     }, [identity])
 
-    // 动画相关
     const [picShow, setPicShow] = useState<string>('')
     const [picDirection, setPicDirection] = useState<Direction>(Direction.left)
     const [picPosition, setPicPosition] = useState(0)
 
-    // 控制器操作相关
-    const [isControlShow, setControlShow] = useState(false)
-
-    // 关闭宠物
     const onClosePet = () => {
         setShow(false)
     }
@@ -173,6 +167,7 @@ const PetsDom = () => {
 
     const [isMenuShow, setMenuShow] = useState(false)
     const [pos, setPos] = useState({ x: 0, y: 0 })
+
     const onMenuToggle = (type: boolean, pos?: { x: number; y: number }) => {
         setMenuShow(type)
         if (pos) {
@@ -181,6 +176,7 @@ const PetsDom = () => {
     }
 
     const [menuAction, setMenuAction] = useState('default')
+
     const onClickMenu = (type: string) => {
         if (type === 'closure') {
             onClosePet()
@@ -202,16 +198,15 @@ const PetsDom = () => {
                     onMenuToggle={(type, pos) => onMenuToggle(type, pos)}
                     setMenuTypeReset={() => setMenuAction('')}>
                     <div
-                        className={classNames(
-                            classes.img,
-                            classes.show,
-                            picDirection === Direction.right && classes.turn,
-                            picPosition === 2 && classes.imgR,
-                        )}
+                        className={classNames({
+                            [classes.img]: true,
+                            [classes.show]: true,
+                            [classes.turn]: picDirection === Direction.right,
+                            [classes.imgR]: picPosition === 2,
+                        })}
                         style={{ backgroundImage: `url(${picShow})` }}
                     />
                     <Message isStop={isStopMsg} />
-                    <Control isShow={isControlShow} onClosePet={() => onClosePet()} />
                     <RightMenu isShow={isMenuShow} pos={pos} onClickMenu={(type) => onClickMenu(type)} />
                 </Drag>
             ) : null}

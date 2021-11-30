@@ -74,7 +74,7 @@ const petConfig = {
 }
 
 export const freeOnStandby = (
-    delay = 3000,
+    delay: number = 3000,
     pos: { x: number; y: number },
     petW: number,
     petH: number,
@@ -82,19 +82,19 @@ export const freeOnStandby = (
 ) => {
     clearTimeout(freeTimer)
     freeTimer = setTimeout(() => {
-        const freeActions = [...petConfig.freeActions]
+        const freeActions: string[] = [...petConfig.freeActions]
         if (pos.x <= 1 || pos.x >= window.innerWidth - petW - 21) {
             // 在边缘，就不能行走
             // const index = freeActions.findIndex((item) => item === 'walk')
             // index >= 0 && freeActions.splice(index, 1);
         } else {
             // 不在边缘，不能爬墙
-            const index = freeActions.findIndex((item) => item === 'climb')
+            const index: number = freeActions.findIndex((item) => item === 'climb')
             index >= 0 && freeActions.splice(index, 1)
         }
-        const r = Math.random()
+        const r: number = Math.random()
 
-        const choseAction = freeActions[Math.floor(r * freeActions.length + 1) - 1]
+        const choseAction: string = freeActions[Math.floor(r * freeActions.length + 1) - 1]
 
         callback(choseAction)
     }, delay)
@@ -114,8 +114,8 @@ export enum Direction {
  * */
 export const onPetFallAction = () => {
     // 本次该移动多少距离，每次都移动得越来越大，但不能超过当前距离底部的距离
-    const howFar = window.innerHeight - (options.y + options.petH)
-    const step = Math.min(howFar, options.distance)
+    const howFar: number = window.innerHeight - (options.y + options.petH)
+    const step: number = Math.min(howFar, options.distance)
     if (step >= howFar) {
         options.callback({ y: window.innerHeight - options.petH, isLast: true })
         onActionsEnd()

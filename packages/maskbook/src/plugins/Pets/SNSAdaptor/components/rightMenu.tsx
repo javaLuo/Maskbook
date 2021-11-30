@@ -151,16 +151,17 @@ function RightMenu(props: Props) {
         e.stopPropagation()
         e.nativeEvent.stopPropagation()
     }
+
     return (
         <div
             onMouseDown={stopPop}
             onMouseUp={stopPop}
-            className={classNames(
-                classes.menu,
-                props.isShow && classes.show,
-                isLeft && classes.isLeft,
-                isBottom && classes.isBottom,
-            )}>
+            className={classNames({
+                [classes.menu]: true,
+                [classes.show]: props.isShow,
+                [classes.isLeft]: isLeft,
+                [classes.isBottom]: isBottom,
+            })}>
             <div onClick={() => onClickMenu('reset')}>
                 <span>Reset</span>
             </div>
