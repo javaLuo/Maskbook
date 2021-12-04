@@ -16,7 +16,7 @@ function useDrag(props: Props) {
         })
     }
 
-    const onMouseDown = (e: React.MouseEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
         e.stopPropagation()
         e.preventDefault()
 
@@ -24,7 +24,7 @@ function useDrag(props: Props) {
         setStart({ x: e.pageX, y: e.pageY })
     }
 
-    const onMouseUp = (e: React.MouseEvent) => {
+    const onMouseUp = (e: MouseEvent) => {
         e.stopPropagation()
         e.preventDefault()
 
@@ -33,7 +33,7 @@ function useDrag(props: Props) {
         setMove({ x: 0, y: 0 })
     }
 
-    const onMouseMove = (d: Window, e: React.MouseEvent) => {}
+    const onMouseMove = (e: MouseEvent) => {}
     useEffect(() => {
         window.addEventListener('resize', windowResize)
         document.addEventListener('mousemove', onMouseMove)
