@@ -66,7 +66,7 @@ class Draggable extends React.PureComponent<Props> {
     override state: State = {
         isMouseDown: -1,
         petW: 128,
-        petH: 128,
+        petH: 300, // 128
         pos: {
             // 最终机器人的位置
             x: 0,
@@ -337,7 +337,7 @@ class Draggable extends React.PureComponent<Props> {
 
                 if (type === 'default') {
                     freeOnStandby(
-                        3000,
+                        200000, // 3000
                         this.state.pos,
                         this.state.petW,
                         this.state.petH,
@@ -433,7 +433,7 @@ class Draggable extends React.PureComponent<Props> {
         onActionsEnd()
         switch (action) {
             case 'default':
-                this.getNowPicUrl('default')
+                this.getNowPicUrl('default', 4)
                 break
             case 'drag':
                 this.getNowPicUrl('drag')
