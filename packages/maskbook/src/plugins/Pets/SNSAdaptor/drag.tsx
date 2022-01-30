@@ -454,7 +454,7 @@ class Draggable extends React.PureComponent<Props> {
                 } else {
                     direction = this.state.pos.x < window.innerWidth / 2 ? Direction.right : Direction.left
                 }
-                this.getNowPicUrl('walk', 20)
+                this.getNowPicUrl('walk', 8)
                 this.props.setDirection(direction)
                 choseAction('walk', {
                     x: this.state.pos.x,
@@ -468,7 +468,7 @@ class Draggable extends React.PureComponent<Props> {
                 this.getNowPicUrl('sit', 80)
                 break
             case 'climb':
-                this.getNowPicUrl('climb', 30)
+                this.getNowPicUrl('climb', 8)
                 const isL = this.state.pos.x < window.innerWidth / 2
                 const direction2 = isL ? Direction.right : Direction.left
                 this.props.setDirection(direction2, 2)

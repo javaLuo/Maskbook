@@ -67,10 +67,32 @@ const PetsDom = () => {
         {
             name: 'walk',
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft000.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft001.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft002.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft003.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft004.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft005.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft006.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveleft/Assassin1_Moveleft007.png', import.meta.url),
+                ),
             ],
-            sequence: [{ s: [0, 1], t: Infinity }],
+            sequence: [{ s: [0, 1, 2, 3, 4, 5, 6, 7], t: Infinity }],
         },
         {
             name: 'sit',
@@ -100,10 +122,32 @@ const PetsDom = () => {
         {
             name: 'climb',
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb01.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup000.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup001.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup002.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup003.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup004.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup005.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup006.png', import.meta.url),
+                ),
+                getAssetAsBlobURL(
+                    new URL('../assets/pet_boy/Assassin1_Moveup/Assassin1_Moveup007.png', import.meta.url),
+                ),
             ],
-            sequence: [{ s: [0, 1], t: Infinity }],
+            sequence: [{ s: [0, 1, 2, 3, 4, 5, 6, 7], t: Infinity }],
         },
         {
             name: 'sleep',
