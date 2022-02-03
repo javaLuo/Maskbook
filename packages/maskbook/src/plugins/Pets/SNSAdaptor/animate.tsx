@@ -8,6 +8,7 @@ import classNames from 'classnames'
 import Drag from './drag'
 import Message from './components/animatedMsg'
 import RightMenu from './components/rightMenu'
+import PreUpload from './components/preUpload'
 import { Direction } from './petActionAnimate'
 
 const useStyles = makeStyles()(() => ({
@@ -55,120 +56,159 @@ const PetsDom = () => {
 
     const [picInfo, setPicInfo] = useState([
         {
-            name: 'default',
+            name: 'default', // 默认 站立
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/1.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/2.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/3.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/4.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/5.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/6.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/7.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/8.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/9.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/10.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/11.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/12.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/13.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/14.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/15.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/16.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/17.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/18.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/19.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/20.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/21.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/22.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/23.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/24.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/25.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/26.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/27.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/28.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/29.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/30.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/31.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/32.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/demo/33.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/1.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/4.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/5.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/6.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/7.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/8.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/9.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/10.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/11.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/12.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/13.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/14.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/15.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/16.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/17.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/18.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/19.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/20.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/21.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/22.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/23.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/24.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/25.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportStandBy/Sample4/26.png', import.meta.url)),
             ],
             sequence: [
                 {
-                    s: [
-                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-                        26, 27, 28, 29, 30, 31, 32,
-                    ],
+                    s: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
                     t: Infinity,
+                    f: 6, // 帧切换速度 每50帧切换下一张图
                 },
             ],
         },
         {
-            name: 'stand',
-            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url))],
-            sequence: [{ s: [0], t: Infinity }],
+            name: 'stand', // 坐在某个元素上保持不动
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/8.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0], t: Infinity, f: 50 }],
         },
         {
             name: 'walk',
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/1.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/4.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/5.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/6.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/7.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportWalkSide/Sample4/8.png', import.meta.url)),
             ],
-            sequence: [{ s: [0, 1], t: Infinity }],
+            sequence: [{ s: [0, 1, 2, 3, 4, 5, 6, 7], t: Infinity, f: 4 }],
         },
         {
-            name: 'sit',
+            name: 'sit', // 普通 坐在地面
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame15.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame16.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame17.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame37.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/8.png', import.meta.url)),
             ],
-            sequence: [{ s: [0, 1, 2, 3], t: Infinity }],
+            sequence: [{ s: [0], t: Infinity, f: 80 }],
         },
         {
-            name: 'fall',
-            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame4.png', import.meta.url))],
-            sequence: [{ s: [0], t: Infinity }],
+            name: 'fall', // 坠落
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/4.png', import.meta.url)),
+            ],
+            sequence: [
+                { s: [0, 1], t: 1, f: 2 },
+                { s: [2], t: Infinity, f: 50 },
+            ],
         },
         {
-            name: 'standup',
-            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url))],
-            sequence: [{ s: [0], t: 1 }],
+            name: 'standup', // 从坐到站立的过渡(用于坠落后站起来)
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/5.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/6.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/7.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/8.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportDropWhitoutEmpty/Sample4/9.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0, 1, 2, 3, 4], t: 1, f: 4 }],
         },
         {
-            name: 'drag',
-            pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame9.png', import.meta.url))],
-            sequence: [{ s: [0], t: Infinity }],
+            name: 'drag', // 拖拽时
+            pics: [
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportNeediePricking/Sample4/1.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportNeediePricking/Sample4/2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportNeediePricking/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportNeediePricking/Sample4/4.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportNeediePricking/Sample4/5.png', import.meta.url)),
+            ],
+            sequence: [{ s: [0, 1, 2, 3, 4], t: Infinity, f: 8 }],
         },
         {
-            name: 'climb',
+            name: 'climb', // 爬墙 xian
             pics: [
                 getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb01.png', import.meta.url)),
                 getAssetAsBlobURL(new URL('../assets/pet_fox/frame_climb03.png', import.meta.url)),
             ],
-            sequence: [{ s: [0, 1], t: Infinity }],
+            sequence: [{ s: [0, 1], t: Infinity, f: 30 }],
         },
         {
-            name: 'sleep',
+            name: 'sleep', // 睡觉
             pics: [
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame19.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame18.png', import.meta.url)),
-                getAssetAsBlobURL(new URL('../assets/pet_fox/frame21.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/1.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/2.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/4.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/5.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/6.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/7.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/8.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/9.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/10.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/11.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/12.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/13.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/14.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/15.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportRest/Sample4/16.png', import.meta.url)),
+
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/1.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/3.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/5.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/7.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/9.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/11.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/13.png', import.meta.url)),
+                getAssetAsBlobURL(new URL('../assets/pet_girl/ExportSleepAndWakeUp/Sample4/15.png', import.meta.url)),
             ],
             sequence: [
-                { s: [0, 1, 1], t: 3 },
-                { s: [2], t: 50 },
-                { s: [1, 0], t: 3 },
+                // { s: [0, 1, 1], t: 3, f: 30 },
+                // { s: [2], t: 50, f: 30 },
+                // { s: [1, 0], t: 3, f: 30 },
+                { s: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], t: 24, f: 6 }, // sleeping
+                { s: [16, 17, 18, 19, 20, 21, 22, 23], t: 1, f: 8 }, // wakeup
             ],
         },
         {
-            name: 'shift',
+            name: 'shift', // 跳跃中
             pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame22.png', import.meta.url))],
-            sequence: [{ s: [0], t: Infinity }],
+            sequence: [{ s: [0], t: Infinity, f: 50 }],
         },
         {
-            name: 'shiftend',
+            name: 'shiftend', // 跳跃结束时的过渡
             pics: [getAssetAsBlobURL(new URL('../assets/pet_fox/frame29.png', import.meta.url))],
-            sequence: [{ s: [0], t: 1 }],
+            sequence: [{ s: [0], t: 1, f: 15 }],
         },
     ])
 
@@ -252,6 +292,7 @@ const PetsDom = () => {
                     <RightMenu isShow={isMenuShow} pos={pos} onClickMenu={(type) => onClickMenu(type)} />
                 </Drag>
             ) : null}
+            <PreUpload picInfo={picInfo} />
         </div>
     )
 }

@@ -25,7 +25,7 @@ interface State {
     isClick: boolean
     isPause: boolean
     picGroup: string[]
-    picSequence: { s: number[]; t: number }[]
+    picSequence: { s: number[]; t: number; f: number }[]
     petW: number
     petH: number
     transform: string
@@ -65,8 +65,8 @@ class Draggable extends React.PureComponent<Props> {
     documentMouseDown = this.onDocumentMouseDown.bind(this)
     override state: State = {
         isMouseDown: -1,
-        petW: 128,
-        petH: 300, // 128
+        petW: 300,
+        petH: 400, // 128
         pos: {
             // 最终机器人的位置
             x: 0,
@@ -326,18 +326,12 @@ class Draggable extends React.PureComponent<Props> {
                     if (type === 'shiftend') {
                         nextAction = 'stand'
                     }
-                    this.animateChangesSquence(
-                        this.state.picGroup,
-                        frameTurn,
-                        frameTurn,
-                        this.state.picSequence,
-                        nextAction,
-                    )
+                    this.animateChangesSquence(this.state.picGroup, frameTurn, this.state.picSequence, nextAction)
                 }
 
                 if (type === 'default') {
                     freeOnStandby(
-                        200000, // 3000
+                        3000, // 3000
                         this.state.pos,
                         this.state.petW,
                         this.state.petH,
@@ -372,17 +366,16 @@ class Draggable extends React.PureComponent<Props> {
     animateChangesSquence(
         group: string[],
         frame: number,
-        frameTurn: number,
-        sequence: { s: number[]; t: number }[],
+        sequence: { s: number[]; t: number; f: number }[],
         nextAction = 'default',
     ) {
         if (this.state.isPause) {
-            animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frame, frameTurn, sequence))
+            animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frame, sequence))
             return
         }
 
         let frameNext = frame
-        if (frame > frameTurn) {
+        if (frame > sequence[sequenceNow].f) {
             sequencePicNow = sequencePicNow + 1
             if (sequencePicNow >= sequence[sequenceNow].s.length) {
                 sequencePicNow = 0
@@ -405,9 +398,7 @@ class Draggable extends React.PureComponent<Props> {
         } else {
             frameNext = frame + 1
         }
-        animateTimer = requestAnimationFrame(() =>
-            this.animateChangesSquence(group, frameNext, frameTurn, sequence, nextAction),
-        )
+        animateTimer = requestAnimationFrame(() => this.animateChangesSquence(group, frameNext, sequence, nextAction))
     }
 
     // 检查当前状态，判定应该执行什么动画
@@ -433,7 +424,7 @@ class Draggable extends React.PureComponent<Props> {
         onActionsEnd()
         switch (action) {
             case 'default':
-                this.getNowPicUrl('default', 4)
+                this.getNowPicUrl('default')
                 break
             case 'drag':
                 this.getNowPicUrl('drag')
@@ -454,7 +445,7 @@ class Draggable extends React.PureComponent<Props> {
                 } else {
                     direction = this.state.pos.x < window.innerWidth / 2 ? Direction.right : Direction.left
                 }
-                this.getNowPicUrl('walk', 20)
+                this.getNowPicUrl('walk')
                 this.props.setDirection(direction)
                 choseAction('walk', {
                     x: this.state.pos.x,
@@ -465,10 +456,10 @@ class Draggable extends React.PureComponent<Props> {
                 })
                 break
             case 'sit':
-                this.getNowPicUrl('sit', 80)
+                this.getNowPicUrl('sit')
                 break
             case 'climb':
-                this.getNowPicUrl('climb', 30)
+                this.getNowPicUrl('climb')
                 const isL = this.state.pos.x < window.innerWidth / 2
                 const direction2 = isL ? Direction.right : Direction.left
                 this.props.setDirection(direction2, 2)
@@ -484,10 +475,10 @@ class Draggable extends React.PureComponent<Props> {
                         y: window.innerHeight - this.state.petH,
                     },
                 })
-                this.getNowPicUrl('sleep', 30)
+                this.getNowPicUrl('sleep')
                 break
             case 'standup':
-                this.getNowPicUrl('standup', 10)
+                this.getNowPicUrl('standup')
                 break
             case 'transfer':
                 if (!menuActionInfo) {
@@ -496,7 +487,7 @@ class Draggable extends React.PureComponent<Props> {
                 this.getNowPicUrl('fall') // 传送时用的图片，暂时和fall一样
                 this.setState({
                     isControl: false,
-                    transform: 'scale(0,0) rotate(720deg)',
+                    transform: 'scale(0,0)',
                     opacity: 0,
                 })
 
@@ -504,7 +495,7 @@ class Draggable extends React.PureComponent<Props> {
                     this.setState(
                         {
                             isControl: true,
-                            transform: 'scale(1,1) rotate(0)',
+                            transform: 'scale(1,1)',
                             opacity: 1,
                             pos: {
                                 x: menuActionInfo.x,
@@ -528,7 +519,7 @@ class Draggable extends React.PureComponent<Props> {
                     const resY = rect.top - this.state.petH + 25
                     const x = this.state.pos.x
                     const y = this.state.pos.y
-                    this.getNowPicUrl('shift', 50)
+                    this.getNowPicUrl('shift')
 
                     const params = {
                         x,
@@ -549,7 +540,7 @@ class Draggable extends React.PureComponent<Props> {
                 }
                 break
             case 'shiftend':
-                this.getNowPicUrl('shiftend', 15)
+                this.getNowPicUrl('shiftend')
                 break
             case 'stand':
                 choseAction('stand', {
@@ -558,7 +549,7 @@ class Draggable extends React.PureComponent<Props> {
                     petH: this.state.petH,
                     callback: this.onPetStandActionCallback.bind(this),
                 })
-                this.getNowPicUrl('stand', 20)
+                this.getNowPicUrl('stand')
                 break
         }
     }
@@ -588,7 +579,9 @@ class Draggable extends React.PureComponent<Props> {
 
         if (options.isLast) {
             if (options.x <= 1 || options.x >= window.innerWidth - this.state.petW - 21) {
-                this.beginOneActionPrepare('climb')
+                // this.beginOneActionPrepare('climb')
+                // TODO 小女孩没有爬墙动作
+                this.beginOneActionPrepare('default')
             } else {
                 this.beginOneActionPrepare('default')
             }
