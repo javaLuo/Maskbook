@@ -65,8 +65,8 @@ class Draggable extends React.PureComponent<Props> {
     documentMouseDown = this.onDocumentMouseDown.bind(this)
     override state: State = {
         isMouseDown: -1,
-        petW: 300,
-        petH: 400, // 128
+        petW: 128,
+        petH: 128, // 128
         pos: {
             // 最终机器人的位置
             x: 0,
