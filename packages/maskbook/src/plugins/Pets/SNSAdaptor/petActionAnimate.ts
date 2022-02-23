@@ -70,7 +70,7 @@ export const onActionsEnd = () => {
 // 每过一段时间随机选择一个动作
 let freeTimer: NodeJS.Timeout
 const petConfig = {
-    freeActions: ['walk', 'climb', 'sit', 'sleep'],
+    freeActions: ['walk', 'climb', 'sit', 'sleep', 'try'],
 }
 
 export const freeOnStandby = (

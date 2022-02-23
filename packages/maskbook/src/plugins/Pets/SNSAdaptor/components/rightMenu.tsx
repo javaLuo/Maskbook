@@ -169,7 +169,7 @@ function RightMenu(props: Props) {
                 <span>Climb</span>
             </div>
             <div onClick={() => onClickMenu('sleep')}>
-                <span>Sleep</span>
+                <span>Dance</span>
             </div>
             <div onClick={() => onClickMenu('shift')}>
                 <span>Shift</span>

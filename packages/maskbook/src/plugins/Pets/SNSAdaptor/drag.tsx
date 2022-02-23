@@ -551,6 +551,9 @@ class Draggable extends React.PureComponent<Props> {
                 })
                 this.getNowPicUrl('stand')
                 break
+            case 'try':
+                this.getNowPicUrl('try')
+                break
         }
     }
 
