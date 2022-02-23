@@ -579,9 +579,7 @@ class Draggable extends React.PureComponent<Props> {
 
         if (options.isLast) {
             if (options.x <= 1 || options.x >= window.innerWidth - this.state.petW - 21) {
-                // this.beginOneActionPrepare('climb')
-                // TODO 小女孩没有爬墙动作
-                this.beginOneActionPrepare('default')
+                this.beginOneActionPrepare('climb')
             } else {
                 this.beginOneActionPrepare('default')
             }
