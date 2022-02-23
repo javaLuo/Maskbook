@@ -71,7 +71,7 @@ const PetsDom = () => {
                 getAssetAsBlobURL(new URL('../assets/pet_fox/frame2.png', import.meta.url)),
                 getAssetAsBlobURL(new URL('../assets/pet_fox/frame3.png', import.meta.url)),
             ],
-            sequence: [{ s: [0, 1], t: Infinity, f: 50 }],
+            sequence: [{ s: [0, 1], t: Infinity, f: 10 }],
         },
         {
             name: 'sit',
